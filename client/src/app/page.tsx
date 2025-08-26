@@ -8,9 +8,16 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
 import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
 import { BankStatementConverter } from "@/components/bank-statement-converter";
+import { getAccessToken } from "@/lib/api";
+
+// Console log the access token
+getAccessToken().then((accessToken) => {
+    console.log("Access Token:", accessToken);
+});
 
 export default function Home() {
     const { user, loading } = useAuth();
+
     const [activeSection, setActiveSection] = useState<SidebarActiveSection>(
         SIDE_BAR_SECTIONS.DASHBOARD
     );

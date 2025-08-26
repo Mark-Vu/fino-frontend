@@ -28,3 +28,22 @@ export const POST_PRIVACY_OPTIONS = {
 
 export type PostPrivacy =
     (typeof POST_PRIVACY_OPTIONS)[keyof typeof POST_PRIVACY_OPTIONS];
+
+export const BANK_STATEMENT_FILE_STATUS = {
+    PENDING: 0,
+    PROCESSING: 1,
+    COMPLETED: 2,
+    FAILED: 3,
+} as const;
+
+export type BankStatementFileStatus =
+    (typeof BANK_STATEMENT_FILE_STATUS)[keyof typeof BANK_STATEMENT_FILE_STATUS];
+
+export const UPLOAD_STATUS = {
+    IDLE: "idle",
+    UPLOADING: "uploading",
+    RECEIVED: "received",
+    ERROR: "error",
+} as const;
+
+export type UploadStatus = (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];

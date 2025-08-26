@@ -4,13 +4,13 @@ import { createClient } from "@/utils/supabase/client";
 
 const supabase = createClient();
 
-async function getAccessToken(): Promise<string | null> {
+export async function getAccessToken(): Promise<string | null> {
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
 }
 
 const api = axios.create({
-    baseURL: BACKEND_URL,
+    baseURL: `${BACKEND_URL}/api`,
 });
 
 // Add token to every request dynamically

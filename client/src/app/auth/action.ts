@@ -49,25 +49,3 @@ export async function login(_prevState: LoginActionState, formData: FormData) {
         success: true,
     };
 }
-
-export async function getAccessToken(): Promise<{
-    access_token: string | null;
-}> {
-    try {
-        const supabase = await createClient();
-
-        const {
-            data: { session },
-            error,
-        } = await supabase.auth.getSession();
-
-        if (error || !session) {
-            return { access_token: null };
-        }
-
-        return { access_token: session.access_token };
-    } catch (err) {
-        console.error("Error getting access token:", err);
-        return { access_token: null };
-    }
-}
