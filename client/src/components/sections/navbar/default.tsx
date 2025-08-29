@@ -5,7 +5,6 @@ import { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-import LaunchUI from "../../logos/launch-ui";
 import { Button, type ButtonProps } from "../../ui/button";
 import {
     Navbar as NavbarComponent,
@@ -16,6 +15,7 @@ import Navigation from "../../ui/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { URLS } from "@/lib/constants";
 import LoginModal from "../../auth/login-modal";
+import AppLogo from "../../logos/app";
 
 interface NavbarLink {
     text: string;
@@ -43,26 +43,21 @@ interface NavbarProps {
 }
 
 export default function Navbar({
-    logo = <LaunchUI />,
+    logo = <AppLogo />,
     name = "Fino",
     homeUrl = URLS.home,
     mobileLinks = [
-        {
-            text: "Getting Started",
-            href: "https://www.launchuicomponents.com/",
-        },
-        { text: "Components", href: "https://www.launchuicomponents.com/" },
-        { text: "Documentation", href: "https://www.launchuicomponents.com/" },
+        // {
+        //     text: "Getting Started",
+        //     href: "https://www.launchuicomponents.com/",
+        // },
+        // { text: "Components", href: "https://www.launchuicomponents.com/" },
+        // { text: "Documentation", href: "https://www.launchuicomponents.com/" },
     ],
     actions = [
         {
-            text: "Sign in",
-            href: "https://www.launchuicomponents.com/",
-            isButton: false,
-        },
-        {
-            text: "Get Started",
-            href: "https://www.launchuicomponents.com/",
+            text: "Get started",
+            href: "#",
             isButton: true,
             variant: "default",
         },
@@ -82,44 +77,25 @@ export default function Navbar({
                             className="flex items-center gap-2 text-xl font-bold text-primary"
                         >
                             {logo}
+
                             {name}
                         </a>
                         {showNavigation && (customNavigation || <Navigation />)}
                     </NavbarLeft>
                     <NavbarRight>
-                        {actions.map((action, index) =>
-                            action.isButton ? (
-                                <Button
-                                    key={index}
-                                    variant={action.variant || "default"}
-                                    asChild
-                                >
-                                    <a href={action.href}>
+                        {actions.map((action, index) => (
+                            <LoginModal
+                                key={index}
+                                trigger={
+                                    <Button variant="default">
                                         {action.icon}
                                         {action.text}
                                         {action.iconRight}
-                                    </a>
-                                </Button>
-                            ) : action.text === "Sign in" ? (
-                                <LoginModal
-                                    key={index}
-                                    trigger={
-                                        <span className="hidden text-sm md:block cursor-pointer hover:text-primary transition-colors">
-                                            {action.text}
-                                        </span>
-                                    }
-                                    hidden={false}
-                                />
-                            ) : (
-                                <a
-                                    key={index}
-                                    href={action.href}
-                                    className="hidden text-sm md:block"
-                                >
-                                    {action.text}
-                                </a>
-                            )
-                        )}
+                                    </Button>
+                                }
+                                hidden={false}
+                            />
+                        ))}
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button

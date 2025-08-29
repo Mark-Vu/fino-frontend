@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { LoginForm } from "./login-form";
 import { LogIn } from "lucide-react";
+import AppLogo from "../logos/app";
 
 interface LoginModalProps {
     trigger?: React.ReactNode;
@@ -48,9 +49,15 @@ export default function LoginModal({
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <h1 className="text-3xl font-bold text-primary font-mono tracking-wider mx-auto mb-3">
-                        Fino
-                    </h1>
+                    <div className="flex items-center justify-center gap-2">
+                        <div className="w-6 h-6">
+                            <AppLogo />
+                        </div>
+                        <h1 className="text-3xl font-bold text-primary font-mono tracking-wider">
+                            Fino
+                        </h1>
+                    </div>
+
                     <DialogTitle className="mx-auto">Welcome back</DialogTitle>
                     <DialogDescription className="mx-auto">
                         Login with your email or Google account
