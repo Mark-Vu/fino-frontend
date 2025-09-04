@@ -152,7 +152,6 @@ export function MultipleBankStatementConverter() {
                 ...fileState,
                 jobId: confirmResponse.jobs[index].id,
                 jobStatus: JobStatus.Pending,
-                status: UPLOAD_STATUS.RECEIVED,
             }));
 
             setUploadState((prev) => ({

@@ -1,18 +1,18 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { login, type LoginActionState } from "@/app/auth/action";
-import { useActionState, useEffect, useState } from "react";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { login, type LoginActionState } from "@/app/auth/action";
+import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { Provider } from "@supabase/supabase-js";
 import { SITE_URL } from "@/lib/constants";
 
-const initialState: LoginActionState = {
-    success: false,
-    errors: {},
-};
+// const initialState: LoginActionState = {
+//     success: false,
+//     errors: {},
+// };
 
 export function LoginForm({
     className,
