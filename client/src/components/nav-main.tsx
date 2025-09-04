@@ -1,7 +1,4 @@
 "use client";
-
-import { type Icon } from "@tabler/icons-react";
-
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -10,6 +7,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { type SidebarActiveSection } from "@/lib/constants";
+import { LucideIcon } from "lucide-react";
 
 export function NavMain({
     items,
@@ -19,7 +17,7 @@ export function NavMain({
     items: {
         title: string;
         section: SidebarActiveSection;
-        icon?: Icon;
+        icon?: LucideIcon;
     }[];
     onSectionClick?: (section: SidebarActiveSection) => void;
     activeSection?: SidebarActiveSection;

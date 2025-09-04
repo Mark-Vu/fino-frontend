@@ -28,3 +28,7 @@ export async function getCurrentUserId(): Promise<string> {
         throw new Error("Failed to get current user ID");
     }
 }
+
+export async function logOut(): Promise<void> {
+    await supabase.auth.signOut();
+}

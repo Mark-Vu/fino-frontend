@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-    IconDashboard,
-    IconFile,
-    IconInnerShadowTop,
-} from "@tabler/icons-react";
+import { FileCog } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -19,32 +15,17 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
-import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
+import {
+    SIDE_BAR_SECTIONS,
+    URLS,
+    type SidebarActiveSection,
+} from "@/lib/constants";
+import AppLogo from "./logos/app";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     onSectionChange?: (section: SidebarActiveSection) => void;
     activeSection?: SidebarActiveSection;
 }
-
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    navMain: [
-        {
-            title: SIDE_BAR_SECTIONS.DASHBOARD,
-            section: SIDE_BAR_SECTIONS.DASHBOARD,
-            icon: IconDashboard,
-        },
-        {
-            title: SIDE_BAR_SECTIONS.PDF_TO_CSV,
-            section: SIDE_BAR_SECTIONS.PDF_TO_CSV,
-            icon: IconFile,
-        },
-    ],
-};
 
 export function AppSidebar({
     onSectionChange,
@@ -52,6 +33,21 @@ export function AppSidebar({
     ...props
 }: AppSidebarProps) {
     const { user } = useAuth();
+    const data = {
+        user: user,
+        navMain: [
+            // {
+            //     title: SIDE_BAR_SECTIONS.DASHBOARD,
+            //     section: SIDE_BAR_SECTIONS.DASHBOARD,
+            //     icon: LayoutDashboardIcon,
+            // },
+            {
+                title: SIDE_BAR_SECTIONS.PDF_TO_CSV,
+                section: SIDE_BAR_SECTIONS.PDF_TO_CSV,
+                icon: FileCog,
+            },
+        ],
+    };
 
     const handleSectionClick = (section: SidebarActiveSection) => {
         if (onSectionChange) {
@@ -76,10 +72,13 @@ export function AppSidebar({
                                 }
                                 className="w-full text-left"
                             >
-                                <IconInnerShadowTop className="!size-5" />
-                                <span className="text-3xl font-semibold">
+                                <a
+                                    href={URLS.home}
+                                    className="flex items-center gap-2 text-3xl font-bold text-primary"
+                                >
+                                    <AppLogo />
                                     Fino
-                                </span>
+                                </a>
                             </button>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

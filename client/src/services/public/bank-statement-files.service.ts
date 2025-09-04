@@ -92,12 +92,13 @@ export class PublicBankStatementFilesService {
      * @returns Promise with confirmation response including job details
      */
     static async confirmUpload(
-        fileId: string
+        fileId: string,
+        fileName: string
     ): Promise<UploadBankStatementConfirmResponse> {
         try {
             const response = await api.post<UploadBankStatementConfirmResponse>(
                 `/public/bank-statement-files/${fileId}/confirm`,
-                { fileId }
+                { fileId, fileName }
             );
 
             return response.data;

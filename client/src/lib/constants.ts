@@ -10,6 +10,8 @@ export const CONTACT = {
 
 export const URLS = {
     home: "/",
+    dashboard: "#dashboard",
+    bankStatementConverter: "#bankstatement-converter",
 };
 
 export const SIDE_BAR_SECTIONS = {

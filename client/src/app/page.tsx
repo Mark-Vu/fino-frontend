@@ -1,22 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
 import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
-import { BankStatementConverter } from "@/components/bank-statement-converter";
-import { PublicBankStatementConverter } from "@/components/public-bank-statement-converter";
 import { getAccessToken } from "@/lib/api";
 import { Hero } from "@/components/sections/landingpage/hero";
 import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
+import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
 
 // Console log the access token
 getAccessToken().then((accessToken) => {
     console.log("Access Token:", accessToken);
 });
+
+// Helper function to get section from URL hash
+const getSectionFromHash = (): SidebarActiveSection => {
+    if (typeof window === "undefined") return SIDE_BAR_SECTIONS.DASHBOARD;
+
+    const hash = window.location.hash;
+    switch (hash) {
+        case "#dashboard":
+            return SIDE_BAR_SECTIONS.DASHBOARD;
+        case "#bankstatement-converter":
+            return SIDE_BAR_SECTIONS.PDF_TO_CSV;
+        default:
+            return SIDE_BAR_SECTIONS.DASHBOARD;
+    }
+};
 
 export default function Home() {
     const { user, loading } = useAuth();
@@ -24,6 +38,38 @@ export default function Home() {
     const [activeSection, setActiveSection] = useState<SidebarActiveSection>(
         SIDE_BAR_SECTIONS.DASHBOARD
     );
+
+    // Handle hash changes and initial load
+    useEffect(() => {
+        const handleHashChange = () => {
+            const newSection = getSectionFromHash();
+            setActiveSection(newSection);
+        };
+
+        // Set initial section based on hash
+        handleHashChange();
+
+        // Listen for hash changes
+        window.addEventListener("hashchange", handleHashChange);
+
+        return () => {
+            window.removeEventListener("hashchange", handleHashChange);
+        };
+    }, []);
+
+    // Handle section change and update URL hash
+    const handleSectionChange = (section: SidebarActiveSection) => {
+        setActiveSection(section);
+
+        // Update URL hash
+        const hash =
+            section === SIDE_BAR_SECTIONS.DASHBOARD
+                ? "#dashboard"
+                : "#bankstatement-converter";
+        if (window.location.hash !== hash) {
+            window.history.pushState(null, "", hash);
+        }
+    };
 
     if (loading) {
         return (
@@ -48,7 +94,7 @@ export default function Home() {
             >
                 <AppSidebar
                     variant="inset"
-                    onSectionChange={setActiveSection}
+                    onSectionChange={handleSectionChange}
                     activeSection={activeSection}
                 />
                 <SidebarInset>
@@ -138,7 +184,7 @@ export default function Home() {
 
                                 {activeSection ===
                                     SIDE_BAR_SECTIONS.PDF_TO_CSV && (
-                                    <BankStatementConverter />
+                                    <MultipleBankStatementConverter />
                                 )}
                             </div>
                         </div>

@@ -4,7 +4,6 @@ import {
     IconCreditCard,
     IconDotsVertical,
     IconLogout,
-    IconNotification,
     IconUserCircle,
 } from "@tabler/icons-react";
 
@@ -26,9 +25,17 @@ import {
 } from "@/components/ui/sidebar";
 import { DEFAULT_AVATAR } from "@/lib/constants";
 import { User } from "@supabase/supabase-js";
+import { logOut } from "@/services/users.service";
+import { useRouter } from "next/navigation";
 
 export function NavUser({ user }: { user: User }) {
     const { isMobile } = useSidebar();
+    const router = useRouter();
+    function handleLogOut() {
+        logOut();
+        router.refresh();
+    }
+    console.log(user.user_metadata);
 
     return (
         <SidebarMenu>
@@ -39,13 +46,13 @@ export function NavUser({ user }: { user: User }) {
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
-                            <Avatar className="h-8 w-8 rounded-lg grayscale">
+                            <Avatar className="h-8 w-8 rounded-lg">
                                 <AvatarImage
                                     src={
-                                        user.avatar ||
-                                        `${DEFAULT_AVATAR}${user.name}`
+                                        user.user_metadata.avatar_url ||
+                                        `${DEFAULT_AVATAR}${user.user_metadata.email}`
                                     }
-                                    alt={user.name}
+                                    alt={user.user_metadata.email}
                                 />
                                 <AvatarFallback className="rounded-lg">
                                     CN
@@ -53,7 +60,7 @@ export function NavUser({ user }: { user: User }) {
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                    {user.name}
+                                    {user.user_metadata.name}
                                 </span>
                                 <span className="text-muted-foreground truncate text-xs">
                                     {user.email}
@@ -72,8 +79,11 @@ export function NavUser({ user }: { user: User }) {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage
-                                        src={user.avatar}
-                                        alt={user.name}
+                                        src={
+                                            user.user_metadata.avatar_url ||
+                                            `${DEFAULT_AVATAR}${user.user_metadata.email}`
+                                        }
+                                        alt={user.user_metadata.email}
                                     />
                                     <AvatarFallback className="rounded-lg">
                                         CN
@@ -81,7 +91,7 @@ export function NavUser({ user }: { user: User }) {
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">
-                                        {user.name}
+                                        {user.user_metadata.name}
                                     </span>
                                     <span className="text-muted-foreground truncate text-xs">
                                         {user.email}
@@ -99,13 +109,9 @@ export function NavUser({ user }: { user: User }) {
                                 <IconCreditCard />
                                 Billing
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <IconNotification />
-                                Notifications
-                            </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleLogOut()}>
                             <IconLogout />
                             Log out
                         </DropdownMenuItem>

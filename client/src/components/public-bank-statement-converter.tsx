@@ -6,14 +6,16 @@ import { FileText, AlertCircle, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import LoginModal from "@/components/auth/login-modal";
 import {
     PublicBankStatementFilesService,
     JobStatus,
 } from "@/services/public/bank-statement-files.service";
+import { UPLOAD_STATUS, type UploadStatus } from "@/lib/constants";
 
 interface UploadState {
     file: File | null;
+    status: UploadStatus;
+    progress: number;
     error?: string;
     uploadResult?: {
         fileId: string;
@@ -24,12 +26,13 @@ interface UploadState {
     jobStatus?: JobStatus;
     isPolling?: boolean;
     fileId?: string; // Store the fileId for download
-    isUploading?: boolean; // Track upload state
 }
 
 export function PublicBankStatementConverter() {
     const [uploadState, setUploadState] = useState<UploadState>({
         file: null,
+        status: UPLOAD_STATUS.IDLE,
+        progress: 0,
     });
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -42,14 +45,19 @@ export function PublicBankStatementConverter() {
         if (!validation.isValid) {
             setUploadState({
                 file: null,
+                status: UPLOAD_STATUS.ERROR,
+                progress: 0,
                 error: validation.errors.join(", "),
             });
             return;
         }
 
-        // Just set the file, don't upload yet
+        // Clear any existing state and set new file
         setUploadState({
             file,
+            status: UPLOAD_STATUS.IDLE,
+            progress: 0,
+            error: undefined,
         });
     }, []);
 
@@ -58,7 +66,9 @@ export function PublicBankStatementConverter() {
 
         setUploadState((prev) => ({
             ...prev,
-            isUploading: true,
+            status: UPLOAD_STATUS.UPLOADING,
+            progress: 0,
+            error: undefined,
         }));
 
         try {
@@ -71,23 +81,26 @@ export function PublicBankStatementConverter() {
             // Step 2: Confirm upload with backend
             const confirmResult =
                 await PublicBankStatementFilesService.confirmUpload(
-                    result.fileId
+                    result.fileId,
+                    uploadState.file.name
                 );
 
             setUploadState({
                 file: uploadState.file,
+                status: UPLOAD_STATUS.RECEIVED,
+                progress: 100,
                 uploadResult: result,
                 jobId: confirmResult.job.id,
                 jobStatus: confirmResult.job.status,
                 isPolling: true,
                 fileId: result.fileId,
-                isUploading: false, // Upload complete
             });
         } catch (error) {
             setUploadState({
                 file: uploadState.file,
+                status: UPLOAD_STATUS.ERROR,
+                progress: 0,
                 error: error instanceof Error ? error.message : "Upload failed",
-                isUploading: false, // Upload failed
             });
         }
     };
@@ -97,7 +110,7 @@ export function PublicBankStatementConverter() {
         if (!uploadState.jobId || !uploadState.isPolling) return;
 
         const startTime = Date.now();
-        const timeoutDuration = 60000; // 1 minute timeout
+        const timeoutDuration = 90000; // 1 minute 30 seconds timeout
 
         const pollInterval = setInterval(async () => {
             try {
@@ -107,7 +120,7 @@ export function PublicBankStatementConverter() {
                     setUploadState((prev) => ({
                         ...prev,
                         isPolling: false,
-                        error: "Polling timeout: Job status check exceeded 1 minute",
+                        error: "Conversion timeout: Job status check exceeded 1 minute 30 seconds",
                     }));
                     return;
                 }
@@ -158,7 +171,6 @@ export function PublicBankStatementConverter() {
             // Create a temporary link and trigger download
             const link = document.createElement("a");
             link.href = response.downloadUrl;
-            link.download = `bank-statement-${uploadState.fileId}.csv`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -186,11 +198,11 @@ export function PublicBankStatementConverter() {
     const getJobStatusBadgeClasses = (status: JobStatus) => {
         switch (status) {
             case JobStatus.Pending:
-                return "bg-primary/40";
+                return "bg-yellow-300 text-foreground";
             case JobStatus.Processing:
-                return "bg-primary";
+                return "bg-blue-600 text-white";
             case JobStatus.Success:
-                return "bg-primary";
+                return "bg-green-600 text-white";
             case JobStatus.Failed:
                 return "bg-red-600 text-white";
             default:
@@ -205,7 +217,7 @@ export function PublicBankStatementConverter() {
         },
         maxFiles: 1,
         disabled:
-            uploadState.isUploading ||
+            uploadState.status === UPLOAD_STATUS.UPLOADING ||
             uploadState.jobStatus === JobStatus.Pending ||
             uploadState.jobStatus === JobStatus.Processing,
     });
@@ -213,6 +225,9 @@ export function PublicBankStatementConverter() {
     const resetUpload = () => {
         setUploadState({
             file: null,
+            status: UPLOAD_STATUS.IDLE,
+            progress: 0,
+            error: undefined,
         });
     };
 
@@ -220,14 +235,15 @@ export function PublicBankStatementConverter() {
         return "Drop your PDF here or click to browse";
     };
 
+    const isConversionComplete =
+        uploadState.jobStatus === JobStatus.Success ||
+        uploadState.jobStatus === JobStatus.Failed;
+
     return (
         <div className="px-4 lg:px-6 max-w-screen-2xl mx-auto">
             <div className="flex flex-col gap-6">
                 <div className="text-center">
-                    <h1 className="text-xl font-bold mb-2 flex items-center justify-center gap-3">
-                        <span className="inline-flex items-center justify-center w-8 h-8 bg-primary text-white text-sm font-bold rounded-full">
-                            1
-                        </span>
+                    <h1 className="text-3xl font-bold mb-2">
                         Bank Statement Converter
                     </h1>
                     <p className="text-muted-foreground text-lg">
@@ -248,7 +264,8 @@ export function PublicBankStatementConverter() {
                         <div
                             {...getRootProps()}
                             className={`border-2 border-dashed rounded-lg p-8 text-center border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 ${
-                                uploadState.isUploading ||
+                                uploadState.status ===
+                                    UPLOAD_STATUS.UPLOADING ||
                                 uploadState.jobStatus === JobStatus.Pending ||
                                 uploadState.jobStatus === JobStatus.Processing
                                     ? "cursor-not-allowed opacity-50"
@@ -266,18 +283,6 @@ export function PublicBankStatementConverter() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="mt-2">
-                            <LoginModal
-                                trigger={
-                                    <span className="block text-right text-primary underline text-sm cursor-pointer hover:text-primary/80">
-                                        Try our most accurate converter — get 10
-                                        free uses here
-                                    </span>
-                                }
-                                hidden={false}
-                            />
                         </div>
 
                         {/* File Info */}
@@ -300,16 +305,13 @@ export function PublicBankStatementConverter() {
                                             </p>
                                         </div>
                                     </div>
-                                    {uploadState.isUploading ? (
-                                        <Badge className="bg-muted text-muted-foreground">
-                                            Uploading
-                                        </Badge>
-                                    ) : uploadState.jobStatus !== undefined ? (
+                                    {uploadState.jobStatus !== undefined ? (
                                         uploadState.jobStatus ===
                                         JobStatus.Success ? (
                                             <Button
                                                 onClick={handleDownload}
                                                 size="sm"
+                                                className="bg-green-600 hover:bg-green-700"
                                             >
                                                 <Download className="w-4 h-4 mr-2" />
                                                 Download
@@ -329,48 +331,65 @@ export function PublicBankStatementConverter() {
                                                 )}
                                             </Badge>
                                         )
-                                    ) : null}
+                                    ) : uploadState.status ===
+                                      UPLOAD_STATUS.RECEIVED ? (
+                                        <Badge className="bg-muted text-foreground">
+                                            Received
+                                        </Badge>
+                                    ) : (
+                                        <Badge
+                                            className={
+                                                uploadState.status ===
+                                                UPLOAD_STATUS.ERROR
+                                                    ? "bg-red-600 text-white"
+                                                    : "bg-muted text-foreground"
+                                            }
+                                        >
+                                            {uploadState.status}
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {/* Error Message */}
-                        {uploadState.error && (
-                            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                                <div className="flex items-center gap-2">
-                                    <AlertCircle className="w-5 h-5 text-red-500" />
-                                    <p className="text-red-700 dark:text-red-300">
-                                        {uploadState.error}
-                                    </p>
+                        {uploadState.status === UPLOAD_STATUS.ERROR &&
+                            uploadState.error && (
+                                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                    <div className="flex items-center gap-2">
+                                        <AlertCircle className="w-5 h-5 text-red-500" />
+                                        <p className="text-red-700 dark:text-red-300">
+                                            {uploadState.error}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <div className="flex justify-end">
-                            <Button
-                                onClick={handleConvert}
-                                disabled={
-                                    uploadState.isUploading ||
-                                    uploadState.jobStatus != undefined
-                                }
-                                className="bg-primary hover:bg-primary/90"
-                            >
-                                Convert
-                            </Button>
-                        </div>
+                        {/* Convert Button - Bottom Right */}
+                        {uploadState.file &&
+                            uploadState.status === UPLOAD_STATUS.IDLE && (
+                                <div className="flex justify-end">
+                                    <Button
+                                        onClick={handleConvert}
+                                        className="bg-primary hover:bg-primary/90"
+                                    >
+                                        Convert
+                                    </Button>
+                                </div>
+                            )}
 
                         {/* Action Buttons */}
                         <div className="flex gap-3 justify-center">
-                            {uploadState.jobStatus === JobStatus.Success ||
-                            uploadState.jobStatus === JobStatus.Failed ? (
+                            {isConversionComplete && (
                                 <Button onClick={resetUpload} variant="outline">
-                                    Upload Another File
+                                    Upload Another Batch
                                 </Button>
-                            ) : uploadState.error ? (
+                            )}
+                            {uploadState.status === UPLOAD_STATUS.ERROR && (
                                 <Button onClick={resetUpload} variant="outline">
                                     Try Again
                                 </Button>
-                            ) : null}
+                            )}
                         </div>
                     </CardContent>
                 </Card>
