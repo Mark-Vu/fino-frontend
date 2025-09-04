@@ -1,12 +1,19 @@
 import Image from "next/image";
 
-const AppLogo = () => (
+interface AppLogoProps {
+    width?: number;
+    height?: number;
+    className?: string;
+}
+
+const AppLogo = ({ width = 24, height = 24, className }: AppLogoProps) => (
     <Image
         src="/logo.png"
         alt="Fino"
-        width={24}
-        height={24}
-        className="w-full h-full"
+        width={width}
+        height={height}
+        className={className}
     />
 );
+
 export default AppLogo;

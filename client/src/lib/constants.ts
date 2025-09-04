@@ -38,14 +38,65 @@ export const BANK_STATEMENT_FILE_STATUS = {
     FAILED: 3,
 } as const;
 
+export enum JobStatus {
+    Pending = 0,
+    Processing = 1,
+    Success = 2,
+    Failed = 3,
+}
+
 export type BankStatementFileStatus =
     (typeof BANK_STATEMENT_FILE_STATUS)[keyof typeof BANK_STATEMENT_FILE_STATUS];
 
 export const UPLOAD_STATUS = {
     IDLE: "idle",
     UPLOADING: "uploading",
-    RECEIVED: "received",
     ERROR: "error",
 } as const;
 
 export type UploadStatus = (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];
+
+export const getJobStatusText = (status: JobStatus) => {
+    switch (status) {
+        case 0:
+            return "Received";
+        case 1:
+            return "Processing";
+        case 2:
+            return "Completed";
+        case 3:
+            return "Failed";
+        default:
+            return "Unknown";
+    }
+};
+
+export const getJobStatusBadgeClasses = (status: JobStatus) => {
+    switch (status) {
+        case 0:
+            return "bg-yellow-300 text-foreground";
+        case 1:
+            return "bg-blue-600 text-white";
+        case 2:
+            return "bg-green-600 text-white";
+        case 3:
+            return "bg-red-600 text-white";
+        default:
+            return "bg-muted text-foreground";
+    }
+};
+
+export const getMultipleJobStatusText = (status: JobStatus) => {
+    switch (status) {
+        case 0:
+            return "Received";
+        case 1:
+            return "Processing";
+        case 2:
+            return "Completed";
+        case 3:
+            return "Failed";
+        default:
+            return "Unknown";
+    }
+};

@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import { JobStatus } from "@/lib/constants";
 
 export interface UploadBankStatementResponse {
     fileId: string;
@@ -15,13 +16,6 @@ export interface ConversionJob {
     finishedAt?: string;
     createdAt: string;
     updatedAt: string;
-}
-
-export enum JobStatus {
-    Pending = 0,
-    Processing = 1,
-    Success = 2,
-    Failed = 3,
 }
 
 export interface UploadBankStatementConfirmResponse {

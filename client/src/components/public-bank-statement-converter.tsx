@@ -6,11 +6,15 @@ import { FileText, AlertCircle, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PublicBankStatementFilesService } from "@/services/public/bank-statement-files.service";
 import {
-    PublicBankStatementFilesService,
+    getJobStatusText,
     JobStatus,
-} from "@/services/public/bank-statement-files.service";
-import { UPLOAD_STATUS, type UploadStatus } from "@/lib/constants";
+    UPLOAD_STATUS,
+    type UploadStatus,
+} from "@/lib/constants";
+import LoginModal from "./auth/login-modal";
+import { getJobStatusBadgeClasses } from "@/lib/constants";
 
 interface UploadState {
     file: File | null;
@@ -79,22 +83,10 @@ export function PublicBankStatementConverter() {
                 );
 
             // Step 2: Confirm upload with backend
-            const confirmResult =
-                await PublicBankStatementFilesService.confirmUpload(
-                    result.fileId,
-                    uploadState.file.name
-                );
-
-            setUploadState({
-                file: uploadState.file,
-                status: UPLOAD_STATUS.RECEIVED,
-                progress: 100,
-                uploadResult: result,
-                jobId: confirmResult.job.id,
-                jobStatus: confirmResult.job.status,
-                isPolling: true,
-                fileId: result.fileId,
-            });
+            await PublicBankStatementFilesService.confirmUpload(
+                result.fileId,
+                uploadState.file.name
+            );
         } catch (error) {
             setUploadState({
                 file: uploadState.file,
@@ -180,36 +172,6 @@ export function PublicBankStatementConverter() {
         }
     };
 
-    const getJobStatusText = (status: JobStatus) => {
-        switch (status) {
-            case JobStatus.Pending:
-                return "Received";
-            case JobStatus.Processing:
-                return "Processing";
-            case JobStatus.Success:
-                return "Completed";
-            case JobStatus.Failed:
-                return "Failed";
-            default:
-                return "Unknown";
-        }
-    };
-
-    const getJobStatusBadgeClasses = (status: JobStatus) => {
-        switch (status) {
-            case JobStatus.Pending:
-                return "bg-yellow-300 text-foreground";
-            case JobStatus.Processing:
-                return "bg-blue-600 text-white";
-            case JobStatus.Success:
-                return "bg-green-600 text-white";
-            case JobStatus.Failed:
-                return "bg-red-600 text-white";
-            default:
-                return "bg-muted text-foreground";
-        }
-    };
-
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
         accept: {
@@ -243,7 +205,7 @@ export function PublicBankStatementConverter() {
         <div className="px-4 lg:px-6 max-w-screen-2xl mx-auto">
             <div className="flex flex-col gap-6">
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold mb-2">
+                    <h1 className="text-xl font-bold mb-2">
                         Bank Statement Converter
                     </h1>
                     <p className="text-muted-foreground text-lg">
@@ -331,21 +293,21 @@ export function PublicBankStatementConverter() {
                                                 )}
                                             </Badge>
                                         )
-                                    ) : uploadState.status ===
-                                      UPLOAD_STATUS.RECEIVED ? (
+                                    ) : uploadState.jobStatus ===
+                                      JobStatus.Pending ? (
                                         <Badge className="bg-muted text-foreground">
                                             Received
                                         </Badge>
                                     ) : (
                                         <Badge
                                             className={
-                                                uploadState.status ===
-                                                UPLOAD_STATUS.ERROR
+                                                uploadState.jobStatus ===
+                                                JobStatus.Failed
                                                     ? "bg-red-600 text-white"
                                                     : "bg-muted text-foreground"
                                             }
                                         >
-                                            {uploadState.status}
+                                            error
                                         </Badge>
                                     )}
                                 </div>
@@ -382,7 +344,7 @@ export function PublicBankStatementConverter() {
                         <div className="flex gap-3 justify-center">
                             {isConversionComplete && (
                                 <Button onClick={resetUpload} variant="outline">
-                                    Upload Another Batch
+                                    Upload Another File
                                 </Button>
                             )}
                             {uploadState.status === UPLOAD_STATUS.ERROR && (
@@ -393,6 +355,17 @@ export function PublicBankStatementConverter() {
                         </div>
                     </CardContent>
                 </Card>
+                <div className="mt-2">
+                    <LoginModal
+                        trigger={
+                            <span className="block text-right text-primary underline text-sm cursor-pointer hover:text-primary/80">
+                                Try our most accurate converter — get 10 free
+                                uses here
+                            </span>
+                        }
+                        hidden={false}
+                    />
+                </div>
             </div>
         </div>
     );

@@ -11,6 +11,7 @@ import { getAccessToken } from "@/lib/api";
 import { Hero } from "@/components/sections/landingpage/hero";
 import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
+import Footer from "@/components/sections/landingpage/footer";
 
 // Console log the access token
 getAccessToken().then((accessToken) => {
@@ -46,7 +47,9 @@ export default function Home() {
             setActiveSection(newSection);
         };
 
-        // Set initial section based on hash
+        if (!window.location.hash) {
+            window.history.replaceState(null, "", "#bankstatement-converter");
+        }
         handleHashChange();
 
         // Listen for hash changes
@@ -198,6 +201,7 @@ export default function Home() {
         <div className="flex flex-col gap-16">
             <Hero />
             <TryOurServices />
+            <Footer />
         </div>
     );
 }

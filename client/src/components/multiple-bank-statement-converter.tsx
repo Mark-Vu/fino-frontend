@@ -6,12 +6,10 @@ import { FileText, AlertCircle, Loader2, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-    MultipleBankStatementFilesService,
-    JobStatus,
-} from "@/services/multiple-bank-statement-files.service";
-import { UPLOAD_STATUS, type UploadStatus } from "@/lib/constants";
+import { MultipleBankStatementFilesService } from "@/services/multiple-bank-statement-files.service";
+import { JobStatus, UPLOAD_STATUS, type UploadStatus } from "@/lib/constants";
 import { useAuth } from "@/context/auth-context";
+import { getJobStatusBadgeClasses, getJobStatusText } from "@/lib/constants";
 
 interface FileUploadState {
     file: File;
@@ -269,36 +267,6 @@ export function MultipleBankStatementConverter() {
         }
     };
 
-    const getJobStatusText = (status: JobStatus) => {
-        switch (status) {
-            case JobStatus.Pending:
-                return "Received";
-            case JobStatus.Processing:
-                return "Processing";
-            case JobStatus.Success:
-                return "Completed";
-            case JobStatus.Failed:
-                return "Failed";
-            default:
-                return "Unknown";
-        }
-    };
-
-    const getJobStatusBadgeClasses = (status: JobStatus) => {
-        switch (status) {
-            case JobStatus.Pending:
-                return "bg-yellow-300 text-foreground";
-            case JobStatus.Processing:
-                return "bg-blue-600 text-white";
-            case JobStatus.Success:
-                return "bg-green-600 text-white";
-            case JobStatus.Failed:
-                return "bg-red-600 text-white";
-            default:
-                return "bg-muted text-foreground";
-        }
-    };
-
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
         accept: {
@@ -406,12 +374,8 @@ export function MultipleBankStatementConverter() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {fileState.status ===
-                                                UPLOAD_STATUS.UPLOADING ? (
-                                                    <Badge className="bg-blue-600 text-white">
-                                                        Uploading
-                                                    </Badge>
-                                                ) : fileState.jobStatus ? (
+                                                {fileState.jobStatus !==
+                                                undefined ? (
                                                     fileState.jobStatus ===
                                                     JobStatus.Success ? (
                                                         <Button
@@ -442,9 +406,9 @@ export function MultipleBankStatementConverter() {
                                                         </Badge>
                                                     )
                                                 ) : fileState.status ===
-                                                  UPLOAD_STATUS.RECEIVED ? (
+                                                  UPLOAD_STATUS.UPLOADING ? (
                                                     <Badge className="bg-muted text-foreground">
-                                                        Received
+                                                        Uploading
                                                     </Badge>
                                                 ) : (
                                                     <Button

@@ -19,8 +19,8 @@ export function LoginForm({
     ...props
 }: React.ComponentProps<"div">) {
     const [resendTimer, setResendTimer] = useState(0);
-    const [state, formAction, pending] = useActionState(login, initialState);
-    const [email, setEmail] = useState("");
+    // const [state, formAction, pending] = useActionState(login, initialState);
+    // const [email, setEmail] = useState("");
 
     // ⏳ Countdown effect
     useEffect(() => {
@@ -32,11 +32,11 @@ export function LoginForm({
         return () => clearInterval(timer);
     }, [resendTimer]);
 
-    useEffect(() => {
-        if (!pending && state.success) {
-            setResendTimer(30);
-        }
-    }, [pending, state.success]);
+    // useEffect(() => {
+    //     if (!pending && state.success) {
+    //         setResendTimer(30);
+    //     }
+    // }, [pending, state.success]);
 
     const handleLoginWithProvider = async (provider: Provider) => {
         const supabase = createClient();
@@ -55,7 +55,7 @@ export function LoginForm({
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="grid gap-6">
-                <form className="grid gap-6" action={formAction}>
+                {/* <form className="grid gap-6" action={formAction}>
                     <div className="grid gap-3">
                         <Label htmlFor="email">Email</Label>
                         <Input
@@ -95,7 +95,7 @@ export function LoginForm({
                     <span className="bg-background text-muted-foreground relative z-10 px-2">
                         Or continue with
                     </span>
-                </div>
+                </div> */}
 
                 <div className="flex flex-col gap-4">
                     <Button

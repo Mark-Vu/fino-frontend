@@ -33,9 +33,9 @@ export function NavUser({ user }: { user: User }) {
     const router = useRouter();
     function handleLogOut() {
         logOut();
+        router.push("/");
         router.refresh();
     }
-    console.log(user.user_metadata);
 
     return (
         <SidebarMenu>
