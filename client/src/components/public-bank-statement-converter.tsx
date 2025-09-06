@@ -38,7 +38,6 @@ export function PublicBankStatementConverter() {
         status: UPLOAD_STATUS.IDLE,
         progress: 0,
     });
-
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
 
@@ -82,11 +81,23 @@ export function PublicBankStatementConverter() {
                     uploadState.file
                 );
 
-            // Step 2: Confirm upload with backend
-            await PublicBankStatementFilesService.confirmUpload(
-                result.fileId,
-                uploadState.file.name
-            );
+            // Step 2: Confirm upload with backend and get job ID
+            const confirmResult =
+                await PublicBankStatementFilesService.confirmUpload(
+                    result.fileId,
+                    uploadState.file.name
+                );
+
+            // Step 3: Start polling for job status
+            setUploadState((prev) => ({
+                ...prev,
+                status: UPLOAD_STATUS.UPLOADING,
+                uploadResult: result,
+                fileId: result.fileId,
+                jobId: confirmResult.job.id,
+                isPolling: true,
+                jobStatus: JobStatus.Pending,
+            }));
         } catch (error) {
             setUploadState({
                 file: uploadState.file,
@@ -267,47 +278,45 @@ export function PublicBankStatementConverter() {
                                             </p>
                                         </div>
                                     </div>
-                                    {uploadState.jobStatus !== undefined ? (
-                                        uploadState.jobStatus ===
-                                        JobStatus.Success ? (
-                                            <Button
-                                                onClick={handleDownload}
-                                                size="sm"
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                <Download className="w-4 h-4 mr-2" />
-                                                Download
-                                            </Button>
-                                        ) : (
-                                            <Badge
-                                                className={getJobStatusBadgeClasses(
-                                                    uploadState.jobStatus
-                                                )}
-                                            >
-                                                {getJobStatusText(
-                                                    uploadState.jobStatus
-                                                )}
-                                                {uploadState.jobStatus ===
-                                                    JobStatus.Processing && (
-                                                    <Loader2 className="ml-2 w-4 h-4 animate-spin" />
-                                                )}
-                                            </Badge>
-                                        )
+                                    {uploadState.jobStatus ===
+                                    JobStatus.Success ? (
+                                        <Button
+                                            onClick={handleDownload}
+                                            size="sm"
+                                            className="bg-green-600 hover:bg-green-700"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" />
+                                            Download
+                                        </Button>
+                                    ) : uploadState.jobStatus ===
+                                      JobStatus.Failed ? (
+                                        <Badge className="bg-red-600 text-white">
+                                            {getJobStatusText(
+                                                uploadState.jobStatus
+                                            )}
+                                        </Badge>
+                                    ) : uploadState.jobStatus ===
+                                      JobStatus.Processing ? (
+                                        <Badge
+                                            className={getJobStatusBadgeClasses(
+                                                uploadState.jobStatus
+                                            )}
+                                        >
+                                            {getJobStatusText(
+                                                uploadState.jobStatus
+                                            )}
+                                            <Loader2 className="ml-2 w-4 h-4 animate-spin" />
+                                        </Badge>
                                     ) : uploadState.jobStatus ===
                                       JobStatus.Pending ? (
                                         <Badge className="bg-muted text-foreground">
-                                            Received
+                                            {getJobStatusText(
+                                                uploadState.jobStatus
+                                            )}
                                         </Badge>
                                     ) : (
-                                        <Badge
-                                            className={
-                                                uploadState.jobStatus ===
-                                                JobStatus.Failed
-                                                    ? "bg-red-600 text-white"
-                                                    : "bg-muted text-foreground"
-                                            }
-                                        >
-                                            error
+                                        <Badge className="bg-muted text-foreground">
+                                            Ready
                                         </Badge>
                                     )}
                                 </div>

@@ -7,16 +7,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
 import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
-import { getAccessToken } from "@/lib/api";
 import { Hero } from "@/components/sections/landingpage/hero";
 import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
 import Footer from "@/components/sections/landingpage/footer";
-
-// Console log the access token
-getAccessToken().then((accessToken) => {
-    console.log("Access Token:", accessToken);
-});
 
 // Helper function to get section from URL hash
 const getSectionFromHash = (): SidebarActiveSection => {

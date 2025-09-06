@@ -373,42 +373,73 @@ export function MultipleBankStatementConverter() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {fileState.jobStatus !==
-                                                undefined ? (
-                                                    fileState.jobStatus ===
-                                                    JobStatus.Success ? (
-                                                        <Button
-                                                            onClick={() =>
-                                                                handleDownload(
-                                                                    fileState.fileId!
-                                                                )
-                                                            }
-                                                            size="sm"
-                                                            className="bg-green-600 hover:bg-green-700"
-                                                        >
-                                                            <Download className="w-4 h-4 mr-2" />
-                                                            Download
-                                                        </Button>
-                                                    ) : (
-                                                        <Badge
-                                                            className={getJobStatusBadgeClasses(
-                                                                fileState.jobStatus
-                                                            )}
-                                                        >
-                                                            {getJobStatusText(
-                                                                fileState.jobStatus
-                                                            )}
-                                                            {fileState.jobStatus ===
-                                                                JobStatus.Processing && (
-                                                                <Loader2 className="ml-2 w-4 h-4 animate-spin" />
-                                                            )}
-                                                        </Badge>
-                                                    )
+                                                {fileState.jobStatus ===
+                                                JobStatus.Success ? (
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDownload(
+                                                                fileState.fileId!
+                                                            )
+                                                        }
+                                                        size="sm"
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                    >
+                                                        <Download className="w-4 h-4 mr-2" />
+                                                        Download
+                                                    </Button>
+                                                ) : fileState.jobStatus ===
+                                                  JobStatus.Failed ? (
+                                                    <Badge className="bg-red-600 text-white">
+                                                        {getJobStatusText(
+                                                            fileState.jobStatus
+                                                        )}
+                                                    </Badge>
+                                                ) : fileState.jobStatus ===
+                                                  JobStatus.Processing ? (
+                                                    <Badge
+                                                        className={getJobStatusBadgeClasses(
+                                                            fileState.jobStatus
+                                                        )}
+                                                    >
+                                                        {getJobStatusText(
+                                                            fileState.jobStatus
+                                                        )}
+                                                        <Loader2 className="ml-2 w-4 h-4 animate-spin" />
+                                                    </Badge>
+                                                ) : fileState.jobStatus ===
+                                                  JobStatus.Pending ? (
+                                                    <Badge
+                                                        className={getJobStatusBadgeClasses(
+                                                            fileState.jobStatus
+                                                        )}
+                                                    >
+                                                        {getJobStatusText(
+                                                            fileState.jobStatus
+                                                        )}
+                                                    </Badge>
                                                 ) : fileState.status ===
                                                   UPLOAD_STATUS.UPLOADING ? (
                                                     <Badge className="bg-muted text-foreground">
                                                         Uploading
                                                     </Badge>
+                                                ) : fileState.status ===
+                                                  UPLOAD_STATUS.IDLE ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge className="bg-muted text-foreground">
+                                                            Ready
+                                                        </Badge>
+                                                        <Button
+                                                            onClick={() =>
+                                                                removeFile(
+                                                                    index
+                                                                )
+                                                            }
+                                                            size="sm"
+                                                            variant="ghost"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
                                                 ) : (
                                                     <Button
                                                         onClick={() =>
