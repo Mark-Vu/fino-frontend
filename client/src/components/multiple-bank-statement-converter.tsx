@@ -38,8 +38,28 @@ export function MultipleBankStatementConverter() {
         (acceptedFiles: File[]) => {
             if (acceptedFiles.length === 0) return;
 
+            // Check if all current files are complete (success or failed)
+            const allFilesComplete =
+                uploadState.files.length > 0 &&
+                uploadState.files.every(
+                    (file) =>
+                        file.jobStatus === JobStatus.Success ||
+                        file.jobStatus === JobStatus.Failed
+                );
+
+            // If all files are complete, clear them and start fresh
+            if (allFilesComplete) {
+                setUploadState({
+                    files: [],
+                    isProcessing: false,
+                    error: undefined,
+                });
+            }
+
             // Check if adding these files would exceed the 10 file limit
-            const currentFileCount = uploadState.files.length;
+            const currentFileCount = allFilesComplete
+                ? 0
+                : uploadState.files.length;
             const newFileCount = currentFileCount + acceptedFiles.length;
 
             if (newFileCount > 10) {
@@ -79,12 +99,14 @@ export function MultipleBankStatementConverter() {
             if (validFiles.length > 0) {
                 setUploadState((prev) => ({
                     ...prev,
-                    files: [...prev.files, ...validFiles],
+                    files: allFilesComplete
+                        ? validFiles
+                        : [...prev.files, ...validFiles],
                     error: undefined,
                 }));
             }
         },
-        [uploadState.files.length]
+        [uploadState.files]
     );
 
     const removeFile = (index: number) => {

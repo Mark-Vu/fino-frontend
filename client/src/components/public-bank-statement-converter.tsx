@@ -309,7 +309,11 @@ export function PublicBankStatementConverter() {
                                         </Badge>
                                     ) : uploadState.jobStatus ===
                                       JobStatus.Pending ? (
-                                        <Badge className="bg-muted text-foreground">
+                                        <Badge
+                                            className={getJobStatusBadgeClasses(
+                                                uploadState.jobStatus
+                                            )}
+                                        >
                                             {getJobStatusText(
                                                 uploadState.jobStatus
                                             )}
