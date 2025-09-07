@@ -34,10 +34,11 @@ export function Hero() {
 
                         <div className="mt-5 max-w-3xl mx-auto">
                             <p className="text-lg text-muted-foreground">
-                                Fino helps you turn messy bank statements into
-                                clean, structured CSVs ready for analysis. Use
-                                it free without an account, or sign in for saved
-                                history and faster workflows.
+                                Fino helps you turn messy bank statements (PDF,
+                                PNG, JPEG, TIFF) into clean, structured CSVs
+                                ready for analysis. Use it free without an
+                                account, or sign in for saved history and faster
+                                workflows.
                             </p>
                         </div>
 

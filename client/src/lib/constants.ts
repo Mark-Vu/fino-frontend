@@ -100,3 +100,51 @@ export const getMultipleJobStatusText = (status: JobStatus) => {
             return "Unknown";
     }
 };
+
+// File type enum and helpers
+export enum FileType {
+    PDF = "pdf",
+    JPEG = "jpeg",
+    PNG = "png",
+    TIFF = "tiff",
+}
+
+/**
+ * Convert MIME type to file type enum
+ * @param mimeType - The MIME type of the file
+ * @returns FileType enum value
+ */
+export const getFileTypeFromMimeType = (mimeType: string): FileType => {
+    switch (mimeType) {
+        case "application/pdf":
+            return FileType.PDF;
+        case "image/jpeg":
+            return FileType.JPEG;
+        case "image/png":
+            return FileType.PNG;
+        case "image/tiff":
+            return FileType.TIFF;
+        default:
+            throw new Error(`Unsupported file type: ${mimeType}`);
+    }
+};
+
+/**
+ * Get file extension from MIME type
+ * @param mimeType - The MIME type of the file
+ * @returns File extension string
+ */
+export const getFileExtensionFromMimeType = (mimeType: string): string => {
+    switch (mimeType) {
+        case "application/pdf":
+            return "pdf";
+        case "image/jpeg":
+            return "jpeg";
+        case "image/png":
+            return "png";
+        case "image/tiff":
+            return "tiff";
+        default:
+            throw new Error(`Unsupported file type: ${mimeType}`);
+    }
+};

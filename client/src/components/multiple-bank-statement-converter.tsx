@@ -6,8 +6,16 @@ import { FileText, AlertCircle, Loader2, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MultipleBankStatementFilesService } from "@/services/multiple-bank-statement-files.service";
-import { JobStatus, UPLOAD_STATUS, type UploadStatus } from "@/lib/constants";
+import {
+    MultipleBankStatementFilesService,
+    type FileConfirmSpec,
+} from "@/services/multiple-bank-statement-files.service";
+import {
+    JobStatus,
+    UPLOAD_STATUS,
+    type UploadStatus,
+    getFileExtensionFromMimeType,
+} from "@/lib/constants";
 import { useAuth } from "@/context/auth-context";
 import { getJobStatusBadgeClasses, getJobStatusText } from "@/lib/constants";
 
@@ -127,17 +135,28 @@ export function MultipleBankStatementConverter() {
 
         try {
             // Step 1: Get upload URLs for all files
+            const files = uploadState.files.map((f) => f.file);
             const uploadResponse =
                 await MultipleBankStatementFilesService.getUploadUrls(
                     user!.id,
-                    uploadState.files.length
+                    files
                 );
 
             // Step 2: Upload each file to S3
-            const fileIds: string[] = [];
+            const fileSpecs: FileConfirmSpec[] = [];
+
             const updatedFiles = uploadState.files.map((fileState, index) => {
                 const uploadInfo = uploadResponse.files[index];
-                fileIds.push(uploadInfo.fileId);
+
+                fileSpecs.push({
+                    fileId: uploadInfo.fileId,
+                    fileName: fileState.file.name,
+                    fileKey: uploadInfo.fileKey,
+                    fileExtension: getFileExtensionFromMimeType(
+                        fileState.file.type
+                    ),
+                });
+
                 return {
                     ...fileState,
                     fileId: uploadInfo.fileId,
@@ -164,9 +183,8 @@ export function MultipleBankStatementConverter() {
             // Step 3: Confirm uploads and start conversion jobs
             const confirmResponse =
                 await MultipleBankStatementFilesService.confirmMultipleUploads(
-                    fileIds,
-                    user!.id,
-                    updatedFiles.map((file) => file.file.name)
+                    fileSpecs,
+                    user!.id
                 );
 
             // Update files with job IDs
@@ -192,22 +210,26 @@ export function MultipleBankStatementConverter() {
 
     // Poll job status for all files
     useEffect(() => {
-        const jobIds = uploadState.files
-            .filter(
-                (file) =>
-                    file.jobId &&
-                    file.jobStatus !== JobStatus.Success &&
-                    file.jobStatus !== JobStatus.Failed
-            )
-            .map((file) => file.jobId!);
-
-        if (jobIds.length === 0) return;
-
         const startTime = Date.now();
         const timeoutDuration = 60000; // 1 minute timeout
 
         const pollInterval = setInterval(async () => {
             try {
+                // Get current active jobs
+                const jobIds = uploadState.files
+                    .filter(
+                        (file) =>
+                            file.jobId &&
+                            file.jobStatus !== JobStatus.Success &&
+                            file.jobStatus !== JobStatus.Failed
+                    )
+                    .map((file) => file.jobId!);
+
+                if (jobIds.length === 0) {
+                    clearInterval(pollInterval);
+                    return;
+                }
+
                 // Check if we've exceeded the timeout
                 if (Date.now() - startTime > timeoutDuration) {
                     clearInterval(pollInterval);
@@ -227,32 +249,31 @@ export function MultipleBankStatementConverter() {
                     return;
                 }
 
-                // Check status for all active jobs
-                const statusPromises = jobIds.map((jobId) =>
-                    MultipleBankStatementFilesService.getJobStatus(jobId)
-                );
-                const statuses = await Promise.all(statusPromises);
+                // Check status for all active jobs in a single request
+                const statusResponse =
+                    await MultipleBankStatementFilesService.getMultipleJobStatuses(
+                        jobIds
+                    );
 
                 setUploadState((prev) => ({
                     ...prev,
                     files: prev.files.map((file) => {
                         if (!file.jobId) return file;
-                        const status = statuses.find(
-                            (s) => s.id === file.jobId
+                        const status = statusResponse.jobs.find(
+                            (s) => s.jobId === file.jobId
                         );
                         if (!status) return file;
 
                         return {
                             ...file,
                             jobStatus: status.status,
-                            downloadUrl: status.downloadUrl,
-                            error: status.error,
+                            error: status.errorMessage,
                         };
                     }),
                 }));
 
                 // Stop polling if all jobs are complete
-                const allComplete = statuses.every(
+                const allComplete = statusResponse.jobs.every(
                     (status) =>
                         status.status === JobStatus.Success ||
                         status.status === JobStatus.Failed
@@ -292,6 +313,9 @@ export function MultipleBankStatementConverter() {
         onDrop,
         accept: {
             "application/pdf": [".pdf"],
+            "image/jpeg": [".jpg", ".jpeg"],
+            "image/png": [".png"],
+            "image/tiff": [".tiff", ".tif"],
         },
         maxFiles: 10,
         disabled: uploadState.isProcessing || uploadState.files.length >= 10,
@@ -308,7 +332,7 @@ export function MultipleBankStatementConverter() {
         if (uploadState.files.length >= 10) {
             return "Maximum 10 files reached";
         }
-        return "Drop your PDFs here or click to browse";
+        return "Drop your files here or click to browse";
     };
 
     const allFilesComplete =
@@ -327,8 +351,8 @@ export function MultipleBankStatementConverter() {
                         Bank Statement Converter
                     </h1>
                     <p className="text-muted-foreground text-lg">
-                        Upload up to 10 bank statement PDFs and convert them to
-                        CSV format for easy analysis.
+                        Upload up to 10 bank statement files (PDF, PNG, JPEG,
+                        TIFF) and convert them to CSV format for easy analysis.
                     </p>
                 </div>
 
@@ -357,8 +381,8 @@ export function MultipleBankStatementConverter() {
                                         {getStatusText()}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        Up to 10 PDF files supported (max 10MB
-                                        each)
+                                        Up to 10 files supported (PDF, PNG,
+                                        JPEG, TIFF - max 10MB each)
                                     </p>
                                 </div>
                             </div>
@@ -458,20 +482,29 @@ export function MultipleBankStatementConverter() {
                                                             }
                                                             size="sm"
                                                             variant="ghost"
+                                                            title="Remove file"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </Button>
                                                     </div>
                                                 ) : (
-                                                    <Button
-                                                        onClick={() =>
-                                                            removeFile(index)
-                                                        }
-                                                        size="sm"
-                                                        variant="ghost"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </Button>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge className="bg-muted text-foreground">
+                                                            Ready
+                                                        </Badge>
+                                                        <Button
+                                                            onClick={() =>
+                                                                removeFile(
+                                                                    index
+                                                                )
+                                                            }
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            title="Remove file"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
                                                 )}
                                             </div>
                                         </div>

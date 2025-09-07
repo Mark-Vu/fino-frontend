@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Fino",
+    title: "Fino | Accounting Tools - Bank Statement, Delivery Receipt Converter",
     description:
-        "All your accounting needs in one place. Create invoices, convert PDFs to CSV, Bank statement converter, and manage business finances anytime, anywhere. Try Fino free on desktop, mobile, or tablet.",
+        "All your accounting needs in one place. Create invoices, convert PDFs, JPEG, TIFF, Images to CSV, Bank statement, Delivery receipt converter, Try Fino free on desktop, mobile, or tablet.",
 };
 
 export default async function RootLayout({

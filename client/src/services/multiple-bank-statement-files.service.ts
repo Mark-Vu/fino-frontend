@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { JobStatus } from "@/lib/constants";
+import { JobStatus, FileType, getFileTypeFromMimeType } from "@/lib/constants";
 
 export interface FileUploadDto {
     fileId: string;
@@ -7,13 +7,29 @@ export interface FileUploadDto {
     uploadUrl: string;
 }
 
+export interface UploadFileSpec {
+    fileType: FileType;
+}
+
+export interface UploadMultipleBankStatementRequest {
+    userId: string;
+    files: UploadFileSpec[];
+}
+
 export interface UploadMultipleBankStatementResponse {
     files: FileUploadDto[];
 }
 
+export interface FileConfirmSpec {
+    fileId: string;
+    fileName: string;
+    fileKey: string;
+    fileExtension: string;
+}
+
 export interface UploadMultipleBankStatementsConfirmRequest {
     userId: string;
-    fileIds: string[];
+    files: FileConfirmSpec[];
 }
 
 export interface ConversionJob {
@@ -37,21 +53,46 @@ export interface JobStatusResponse {
     error?: string;
 }
 
+export interface JobStatusDto {
+    jobId: string;
+    status: JobStatus;
+    errorMessage?: string;
+    finishedAt?: string;
+}
+
+export interface GetMultipleJobStatusesRequest {
+    jobIds: string[];
+}
+
+export interface GetMultipleJobStatusesResponse {
+    jobs: JobStatusDto[];
+}
+
 export class MultipleBankStatementFilesService {
     /**
      * Get upload URLs for multiple files
-     * @param count - Number of files to upload (1-10)
+     * @param userId - User ID
+     * @param files - Array of files with their types
      * @returns Promise with upload URLs for each file
      */
     static async getUploadUrls(
         userId: string,
-        count: number
+        files: File[]
     ): Promise<UploadMultipleBankStatementResponse> {
         try {
+            const fileSpecs: UploadFileSpec[] = files.map((file) => ({
+                fileType: getFileTypeFromMimeType(file.type),
+            }));
+
+            const request: UploadMultipleBankStatementRequest = {
+                userId,
+                files: fileSpecs,
+            };
+
             const response =
                 await api.post<UploadMultipleBankStatementResponse>(
                     "private/bank-statement-files/upload-multiple",
-                    { userId, count }
+                    request
                 );
             return response.data;
         } catch (error) {
@@ -87,19 +128,24 @@ export class MultipleBankStatementFilesService {
 
     /**
      * Confirm multiple file uploads and start conversion jobs
-     * @param fileIds - Array of file IDs to confirm
+     * @param files - Array of file specifications to confirm
+     * @param userId - User ID
      * @returns Promise with created conversion jobs
      */
     static async confirmMultipleUploads(
-        fileIds: string[],
-        userId: string,
-        fileNames: string[]
+        files: FileConfirmSpec[],
+        userId: string
     ): Promise<UploadMultipleBankStatementsConfirmResponse> {
         try {
+            const request: UploadMultipleBankStatementsConfirmRequest = {
+                userId,
+                files,
+            };
+
             const response =
                 await api.post<UploadMultipleBankStatementsConfirmResponse>(
                     "private/bank-statement-files/confirm-multiple",
-                    { userId, fileIds, fileNames }
+                    request
                 );
             return response.data;
         } catch (error) {
@@ -122,6 +168,30 @@ export class MultipleBankStatementFilesService {
         } catch (error) {
             console.error("Failed to get job status:", error);
             throw new Error("Failed to get job status");
+        }
+    }
+
+    /**
+     * Get status of multiple jobs in a single request
+     * @param jobIds - Array of job IDs to check
+     * @returns Promise with job statuses
+     */
+    static async getMultipleJobStatuses(
+        jobIds: string[]
+    ): Promise<GetMultipleJobStatusesResponse> {
+        try {
+            const request: GetMultipleJobStatusesRequest = {
+                jobIds,
+            };
+
+            const response = await api.post<GetMultipleJobStatusesResponse>(
+                "conversion-jobs/statuses",
+                request
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Failed to get multiple job statuses:", error);
+            throw new Error("Failed to get multiple job statuses");
         }
     }
 
@@ -154,8 +224,15 @@ export class MultipleBankStatementFilesService {
         const errors: string[] = [];
         const maxSize = 10 * 1024 * 1024; // 10MB
 
-        if (file.type !== "application/pdf") {
-            errors.push("Only PDF files are allowed");
+        const supportedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "image/tiff",
+        ];
+
+        if (!supportedTypes.includes(file.type)) {
+            errors.push("Only PDF, JPEG, PNG, and TIFF files are allowed");
         }
 
         if (file.size > maxSize) {

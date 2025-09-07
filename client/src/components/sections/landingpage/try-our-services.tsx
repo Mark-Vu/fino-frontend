@@ -12,7 +12,7 @@ export function TryOurServices() {
                     </h2>
                     <p className="text-muted-foreground mt-3">
                         Start with our most popular tool: Bank Statement
-                        Converter. Upload your PDF and get a clean CSV in
+                        Converter. Upload your files and get a clean CSV in
                         seconds.
                     </p>
                 </div>
