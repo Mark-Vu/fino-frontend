@@ -12,12 +12,12 @@ export interface UploadFileSpec {
     fileType: FileType;
 }
 
-export interface UploadMultipleBankStatementRequest {
+export interface UploadMultipleDeliveryReceiptsRequest {
     userId: string;
     files: UploadFileSpec[];
 }
 
-export interface UploadMultipleBankStatementResponse {
+export interface UploadMultipleDeliveryReceiptsResponse {
     files: FileUploadDto[];
 }
 
@@ -28,26 +28,26 @@ export interface FileConfirmSpec {
     fileExtension: string;
 }
 
-export interface UploadMultipleBankStatementsConfirmRequest {
+export interface UploadMultipleDeliveryReceiptsConfirmRequest {
     userId: string;
     files: FileConfirmSpec[];
 }
 
 export interface ConversionJob {
     id: string;
-    bankStatementFileId: string;
+    uploadedFileId: string;
     status: JobStatus;
     createdAt: string;
     updatedAt: string;
 }
 
-export interface UploadMultipleBankStatementsConfirmResponse {
+export interface UploadMultipleDeliveryReceiptsConfirmResponse {
     jobs: ConversionJob[];
 }
 
-export class MultipleBankStatementFilesService {
+export class DeliveryReceiptFilesService {
     /**
-     * Get upload URLs for multiple files
+     * Get upload URLs for multiple delivery receipt files
      * @param userId - User ID
      * @param files - Array of files with their types
      * @returns Promise with upload URLs for each file
@@ -55,20 +55,20 @@ export class MultipleBankStatementFilesService {
     static async getUploadUrls(
         userId: string,
         files: File[]
-    ): Promise<UploadMultipleBankStatementResponse> {
+    ): Promise<UploadMultipleDeliveryReceiptsResponse> {
         try {
             const fileSpecs: UploadFileSpec[] = files.map((file) => ({
                 fileType: getFileTypeFromMimeType(file.type),
             }));
 
-            const request: UploadMultipleBankStatementRequest = {
+            const request: UploadMultipleDeliveryReceiptsRequest = {
                 userId,
                 files: fileSpecs,
             };
 
             const response =
-                await api.post<UploadMultipleBankStatementResponse>(
-                    "private/bank-statement-files/upload-multiple",
+                await api.post<UploadMultipleDeliveryReceiptsResponse>(
+                    "private/delivery-receipts/upload-multiple",
                     request
                 );
             return response.data;
@@ -104,7 +104,7 @@ export class MultipleBankStatementFilesService {
     }
 
     /**
-     * Confirm multiple file uploads and start conversion jobs
+     * Confirm multiple delivery receipt file uploads and start conversion jobs
      * @param files - Array of file specifications to confirm
      * @param userId - User ID
      * @returns Promise with created conversion jobs
@@ -112,16 +112,16 @@ export class MultipleBankStatementFilesService {
     static async confirmMultipleUploads(
         files: FileConfirmSpec[],
         userId: string
-    ): Promise<UploadMultipleBankStatementsConfirmResponse> {
+    ): Promise<UploadMultipleDeliveryReceiptsConfirmResponse> {
         try {
-            const request: UploadMultipleBankStatementsConfirmRequest = {
+            const request: UploadMultipleDeliveryReceiptsConfirmRequest = {
                 userId,
                 files,
             };
 
             const response =
-                await api.post<UploadMultipleBankStatementsConfirmResponse>(
-                    "private/bank-statement-files/confirm-multiple",
+                await api.post<UploadMultipleDeliveryReceiptsConfirmResponse>(
+                    "private/delivery-receipts/confirm-multiple",
                     request
                 );
             return response.data;
@@ -150,17 +150,18 @@ export class MultipleBankStatementFilesService {
     }
 
     /**
-     * Download the converted CSV file
+     * Download the converted CSV file for delivery receipts
      * @param fileId - The file ID to download
+     * @param userId - User ID
      * @returns Promise with the download URL
      */
-    static async downloadBankStatementCsv(
+    static async downloadDeliveryReceiptCsv(
         fileId: string,
         userId: string
     ): Promise<{ downloadUrl: string }> {
         try {
             const response = await api.get<{ downloadUrl: string }>(
-                `private/bank-statement-files/${userId}/${fileId}/download`
+                `private/delivery-receipts/${userId}/${fileId}/download`
             );
             return response.data;
         } catch (error) {
@@ -170,7 +171,7 @@ export class MultipleBankStatementFilesService {
     }
 
     /**
-     * Validate a file before upload
+     * Validate a file before upload (images only for delivery receipts)
      * @param file - The file to validate
      * @returns Validation result
      */
@@ -178,15 +179,10 @@ export class MultipleBankStatementFilesService {
         const errors: string[] = [];
         const maxSize = 10 * 1024 * 1024; // 10MB
 
-        const supportedTypes = [
-            "application/pdf",
-            "image/jpeg",
-            "image/png",
-            "image/tiff",
-        ];
+        const supportedTypes = ["image/jpeg", "image/png", "image/tiff"];
 
         if (!supportedTypes.includes(file.type)) {
-            errors.push("Only PDF, JPEG, PNG, and TIFF files are allowed");
+            errors.push("Only JPEG, PNG, and TIFF images are allowed");
         }
 
         if (file.size > maxSize) {

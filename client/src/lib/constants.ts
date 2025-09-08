@@ -12,11 +12,13 @@ export const URLS = {
     home: "/",
     dashboard: "#dashboard",
     bankStatementConverter: "#bankstatement-converter",
+    deliveryReceiptConverter: "#delivery-receipt-converter",
 };
 
 export const SIDE_BAR_SECTIONS = {
     DASHBOARD: "Dashboard",
     PDF_TO_CSV: "Bank Statement Converter",
+    DELIVERY_RECEIPT: "Delivery Receipt Converter",
 } as const;
 
 export type SidebarActiveSection =

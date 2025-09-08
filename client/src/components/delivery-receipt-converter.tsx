@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    MultipleBankStatementFilesService,
+    DeliveryReceiptFilesService,
     type FileConfirmSpec,
-} from "@/services/multiple-bank-statement-files.service";
+} from "@/services/delivery-receipt-files.service";
 import {
     JobStatus,
     UPLOAD_STATUS,
@@ -35,7 +35,7 @@ interface UploadState {
     error?: string;
 }
 
-export function MultipleBankStatementConverter() {
+export function DeliveryReceiptConverter() {
     const { user } = useAuth();
     const [uploadState, setUploadState] = useState<UploadState>({
         files: [],
@@ -84,7 +84,7 @@ export function MultipleBankStatementConverter() {
 
             acceptedFiles.forEach((file) => {
                 const validation =
-                    MultipleBankStatementFilesService.validateFile(file);
+                    DeliveryReceiptFilesService.validateFile(file);
                 if (validation.isValid) {
                     validFiles.push({
                         file,
@@ -137,7 +137,7 @@ export function MultipleBankStatementConverter() {
             // Step 1: Get upload URLs for all files
             const files = uploadState.files.map((f) => f.file);
             const uploadResponse =
-                await MultipleBankStatementFilesService.getUploadUrls(
+                await DeliveryReceiptFilesService.getUploadUrls(
                     user!.id,
                     files
                 );
@@ -173,7 +173,7 @@ export function MultipleBankStatementConverter() {
             await Promise.all(
                 updatedFiles.map(async (fileState, index) => {
                     const uploadInfo = uploadResponse.files[index];
-                    await MultipleBankStatementFilesService.uploadFileToS3(
+                    await DeliveryReceiptFilesService.uploadFileToS3(
                         fileState.file,
                         uploadInfo.uploadUrl
                     );
@@ -182,7 +182,7 @@ export function MultipleBankStatementConverter() {
 
             // Step 3: Confirm uploads and start conversion jobs
             const confirmResponse =
-                await MultipleBankStatementFilesService.confirmMultipleUploads(
+                await DeliveryReceiptFilesService.confirmMultipleUploads(
                     fileSpecs,
                     user!.id
                 );
@@ -251,7 +251,7 @@ export function MultipleBankStatementConverter() {
 
                 // Check status for all active jobs in a single request
                 const statusResponse =
-                    await MultipleBankStatementFilesService.getMultipleJobStatuses(
+                    await DeliveryReceiptFilesService.getMultipleJobStatuses(
                         jobIds
                     );
 
@@ -293,7 +293,7 @@ export function MultipleBankStatementConverter() {
     const handleDownload = async (fileId: string) => {
         try {
             const response =
-                await MultipleBankStatementFilesService.downloadBankStatementCsv(
+                await DeliveryReceiptFilesService.downloadDeliveryReceiptCsv(
                     fileId,
                     user!.id
                 );
@@ -312,7 +312,6 @@ export function MultipleBankStatementConverter() {
     const { getRootProps, getInputProps } = useDropzone({
         onDrop,
         accept: {
-            "application/pdf": [".pdf"],
             "image/jpeg": [".jpg", ".jpeg"],
             "image/png": [".png"],
             "image/tiff": [".tiff", ".tif"],
@@ -332,7 +331,7 @@ export function MultipleBankStatementConverter() {
         if (uploadState.files.length >= 10) {
             return "Maximum 10 files reached";
         }
-        return "Drop your files here or click to browse";
+        return "Drop your images here or click to browse";
     };
 
     const allFilesComplete =
@@ -348,11 +347,12 @@ export function MultipleBankStatementConverter() {
             <div className="flex flex-col gap-6">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold mb-2">
-                        Bank Statement Converter
+                        Delivery Receipt Converter
                     </h1>
                     <p className="text-muted-foreground text-lg">
-                        Upload up to 10 bank statement files (PDF, PNG, JPEG,
+                        Upload up to 10 delivery receipt images (JPEG, PNG,
                         TIFF) and convert them to CSV format for easy analysis.
+                        Only support Vietnamese and English for now.
                     </p>
                 </div>
 
@@ -360,7 +360,7 @@ export function MultipleBankStatementConverter() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5" />
-                            Upload Bank Statements
+                            Upload Delivery Receipts
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -381,8 +381,12 @@ export function MultipleBankStatementConverter() {
                                         {getStatusText()}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        Up to 10 files supported (PDF, PNG,
-                                        JPEG, TIFF - max 10MB each)
+                                        Up to 10 image files supported (JPEG,
+                                        PNG, TIFF - max 10MB each)
+                                    </p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Only support Vietnamese and English for
+                                        now
                                     </p>
                                 </div>
                             </div>

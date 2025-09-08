@@ -10,6 +10,7 @@ import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
 import { Hero } from "@/components/sections/landingpage/hero";
 import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
+import { DeliveryReceiptConverter } from "@/components/delivery-receipt-converter";
 import Footer from "@/components/sections/landingpage/footer";
 
 // Helper function to get section from URL hash
@@ -22,6 +23,8 @@ const getSectionFromHash = (): SidebarActiveSection => {
             return SIDE_BAR_SECTIONS.DASHBOARD;
         case "#bankstatement-converter":
             return SIDE_BAR_SECTIONS.PDF_TO_CSV;
+        case "#delivery-receipt-converter":
+            return SIDE_BAR_SECTIONS.DELIVERY_RECEIPT;
         default:
             return SIDE_BAR_SECTIONS.DASHBOARD;
     }
@@ -182,6 +185,11 @@ export default function Home() {
                                 {activeSection ===
                                     SIDE_BAR_SECTIONS.PDF_TO_CSV && (
                                     <MultipleBankStatementConverter />
+                                )}
+
+                                {activeSection ===
+                                    SIDE_BAR_SECTIONS.DELIVERY_RECEIPT && (
+                                    <DeliveryReceiptConverter />
                                 )}
                             </div>
                         </div>

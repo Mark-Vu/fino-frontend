@@ -42,15 +42,14 @@ export function Hero() {
                             </p>
                         </div>
 
-                        <div className="mt-8 gap-3 flex justify-center">
+                        <div className="mt-8 gap-3 flex justify-center flex-col sm:flex-row">
                             <Button variant="default" asChild>
                                 <a href="#try-services">Try it free</a>
                             </Button>
                             <LoginModal
                                 trigger={
                                     <Button variant="outline">
-                                        Claim 10 free trials with our most
-                                        advanced model
+                                        10 free trials with most advanced model
                                         <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 }

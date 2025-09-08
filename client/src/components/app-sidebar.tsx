@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileCog } from "lucide-react";
+import { FileCog, Receipt } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -45,6 +45,11 @@ export function AppSidebar({
                 title: SIDE_BAR_SECTIONS.PDF_TO_CSV,
                 section: SIDE_BAR_SECTIONS.PDF_TO_CSV,
                 icon: FileCog,
+            },
+            {
+                title: SIDE_BAR_SECTIONS.DELIVERY_RECEIPT,
+                section: SIDE_BAR_SECTIONS.DELIVERY_RECEIPT,
+                icon: Receipt,
             },
         ],
     };
