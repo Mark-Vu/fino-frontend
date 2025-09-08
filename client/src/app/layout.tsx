@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import Providers from "../context/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/sections/navbar/default";
 
 const geistSans = Geist({
@@ -54,6 +55,7 @@ export default async function RootLayout({
                     </Providers>
                 </ThemeProvider>
                 <Toaster position="top-center" />
+                <Analytics />
             </body>
         </html>
     );
