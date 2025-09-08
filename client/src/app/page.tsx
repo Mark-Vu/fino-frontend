@@ -62,10 +62,13 @@ export default function Home() {
         setActiveSection(section);
 
         // Update URL hash
-        const hash =
-            section === SIDE_BAR_SECTIONS.DASHBOARD
-                ? "#dashboard"
-                : "#bankstatement-converter";
+        let hash = "#dashboard";
+        if (section === SIDE_BAR_SECTIONS.PDF_TO_CSV) {
+            hash = "#bankstatement-converter";
+        } else if (section === SIDE_BAR_SECTIONS.DELIVERY_RECEIPT) {
+            hash = "#delivery-receipt-converter";
+        }
+
         if (window.location.hash !== hash) {
             window.history.pushState(null, "", hash);
         }
