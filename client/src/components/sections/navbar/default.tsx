@@ -16,6 +16,8 @@ import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
 import { URLS } from "@/lib/constants";
 import LoginModal from "../../auth/login-modal";
 import AppLogo from "../../logos/app";
+import { ModeToggle } from "../../ui/mode-toggle";
+import { PricingModal } from "../landingpage/pricing";
 
 interface NavbarLink {
     text: string;
@@ -83,6 +85,15 @@ export default function Navbar({
                         {showNavigation && (customNavigation || <Navigation />)}
                     </NavbarLeft>
                     <NavbarRight>
+                        <ModeToggle />
+                        <PricingModal
+                            trigger={
+                                <Button variant="ghost" size="sm">
+                                    Pricing
+                                </Button>
+                            }
+                            hidden={false}
+                        />
                         {actions.map((action, index) => (
                             <LoginModal
                                 key={index}

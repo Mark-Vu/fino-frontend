@@ -12,8 +12,8 @@ export function Hero() {
                 aria-hidden="true"
                 className="pointer-events-none absolute -top-96 start-1/2 -translate-x-1/2"
             >
-                <div className="bg-gradient-to-r from-violet-300/50 to-purple-100 blur-3xl w-[400px] h-[700px] -rotate-60 -translate-x-40" />
-                <div className="bg-gradient-to-tl from-blue-50 via-blue-100 to-blue-50 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60" />
+                <div className="bg-gradient-to-r from-violet-300/50 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/20 blur-3xl w-[400px] h-[700px] -rotate-60 -translate-x-40" />
+                <div className="bg-gradient-to-tl from-blue-50 via-blue-100 to-blue-50 dark:from-blue-900/20 dark:via-blue-800/30 dark:to-blue-900/20 blur-3xl w-[1440px] h-[800px] rounded-full origin-top-left -rotate-12 -translate-x-60" />
             </div>
             {/* End Gradients */}
 

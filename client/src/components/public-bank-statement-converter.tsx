@@ -215,16 +215,6 @@ export function PublicBankStatementConverter() {
     return (
         <div className="px-4 lg:px-6 max-w-screen-2xl mx-auto">
             <div className="flex flex-col gap-6">
-                <div className="text-center">
-                    <h1 className="text-xl font-bold mb-2">
-                        Bank Statement Converter
-                    </h1>
-                    <p className="text-muted-foreground text-lg">
-                        Convert your bank statements from PDF to CSV format for
-                        easy analysis.
-                    </p>
-                </div>
-
                 <Card className="max-w-2xl mx-auto w-full">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">

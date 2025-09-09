@@ -9,6 +9,7 @@ import { useAuth } from "@/context/auth-context";
 import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
 import { Hero } from "@/components/sections/landingpage/hero";
 import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
+import { Pricing } from "@/components/sections/landingpage/pricing";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
 import { DeliveryReceiptConverter } from "@/components/delivery-receipt-converter";
 import Footer from "@/components/sections/landingpage/footer";
@@ -102,7 +103,7 @@ export default function Home() {
                 />
                 <SidebarInset>
                     <SiteHeader activeSection={activeSection} />
-                    <div className="flex flex-1 flex-col">
+                    <div className="flex flex-1 flex-col bg-background">
                         <div className="@container/main flex flex-1 flex-col gap-2">
                             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                                 {activeSection ===
@@ -206,6 +207,7 @@ export default function Home() {
         <div className="flex flex-col gap-16">
             <Hero />
             <TryOurServices />
+            <Pricing />
             <Footer />
         </div>
     );
