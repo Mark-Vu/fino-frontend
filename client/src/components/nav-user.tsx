@@ -24,11 +24,11 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { DEFAULT_AVATAR } from "@/lib/constants";
-import { User } from "@supabase/supabase-js";
 import { logOut } from "@/services/users.service";
 import { useRouter } from "next/navigation";
+import { AuthUser } from "@/context/auth-context";
 
-export function NavUser({ user }: { user: User }) {
+export function NavUser({ user }: { user: AuthUser }) {
     const { isMobile } = useSidebar();
     const router = useRouter();
     function handleLogOut() {
@@ -48,19 +48,19 @@ export function NavUser({ user }: { user: User }) {
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
                                 <AvatarImage
-                                    src={
-                                        user.user_metadata.avatar_url ||
-                                        `${DEFAULT_AVATAR}${user.user_metadata.email}`
-                                    }
-                                    alt={user.user_metadata.email}
+                                    src={`${DEFAULT_AVATAR}${user.name}`}
+                                    alt={user.name || "User"}
                                 />
                                 <AvatarFallback className="rounded-lg">
-                                    CN
+                                    <AvatarImage
+                                        src={`${DEFAULT_AVATAR}${user.name}`}
+                                        alt={user.name || "User"}
+                                    />
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                    {user.user_metadata.name}
+                                    {user.name}
                                 </span>
                                 <span className="text-muted-foreground truncate text-xs">
                                     {user.email}
@@ -79,19 +79,19 @@ export function NavUser({ user }: { user: User }) {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage
-                                        src={
-                                            user.user_metadata.avatar_url ||
-                                            `${DEFAULT_AVATAR}${user.user_metadata.email}`
-                                        }
-                                        alt={user.user_metadata.email}
+                                        src={`${DEFAULT_AVATAR}${user.name}`}
+                                        alt={user.name || "User"}
                                     />
                                     <AvatarFallback className="rounded-lg">
-                                        CN
+                                        <AvatarImage
+                                            src={`${DEFAULT_AVATAR}${user.name}`}
+                                            alt={user.name || "User"}
+                                        />
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-medium">
-                                        {user.user_metadata.name}
+                                        {user.name}
                                     </span>
                                     <span className="text-muted-foreground truncate text-xs">
                                         {user.email}

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { createClient } from "@/utils/supabase/server";
 import Providers from "../context/auth-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/sections/navbar/default";
+import { TenantLayout } from "@/components/tenant/tenant-layout";
+import { getCurrentUser } from "./actions/user.action";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -29,11 +30,7 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const supabase = await createClient();
-
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
 
     return (
         <html lang="en" suppressHydrationWarning className="">
@@ -47,11 +44,13 @@ export default async function RootLayout({
                     disableTransitionOnChange
                 >
                     <Providers authUser={user}>
-                        <div className="min-h-screen">
-                            {!user && <Navbar />}
+                        <TenantLayout>
+                            <div className="min-h-screen">
+                                {!user && <Navbar />}
 
-                            <main>{children}</main>
-                        </div>
+                                <main>{children}</main>
+                            </div>
+                        </TenantLayout>
                     </Providers>
                 </ThemeProvider>
                 <Toaster position="top-center" />

@@ -47,6 +47,21 @@ export enum JobStatus {
     Failed = 3,
 }
 
+// File category enum matching backend
+export enum FileCategory {
+    BankStatement = "bankstatement",
+    DeliveryReceipt = "deliveryreceipt",
+}
+
+// File extension enum matching backend
+export enum FileExtension {
+    Pdf = "pdf",
+    Jpg = "jpg",
+    Png = "png",
+    Tiff = "tiff",
+    Xlsx = "xlsx",
+}
+
 export type BankStatementFileStatus =
     (typeof BANK_STATEMENT_FILE_STATUS)[keyof typeof BANK_STATEMENT_FILE_STATUS];
 
@@ -103,7 +118,7 @@ export const getMultipleJobStatusText = (status: JobStatus) => {
     }
 };
 
-// File type enum and helpers
+// File type enum and helpers (keeping for backward compatibility)
 export enum FileType {
     PDF = "pdf",
     JPEG = "jpeg",

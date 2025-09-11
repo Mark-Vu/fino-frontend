@@ -18,6 +18,7 @@ interface LoginModalProps {
     open?: boolean;
     hidden: boolean;
     onOpenChange?: (open: boolean) => void;
+    loginWithGoogle?: boolean;
 }
 
 export default function LoginModal({
@@ -25,6 +26,7 @@ export default function LoginModal({
     open,
     onOpenChange,
     hidden = false,
+    loginWithGoogle = true,
 }: LoginModalProps) {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -63,7 +65,7 @@ export default function LoginModal({
                         Login with your email or Google account
                     </DialogDescription>
                 </DialogHeader>
-                <LoginForm />
+                <LoginForm loginWithGoogle={loginWithGoogle} />
             </DialogContent>
         </Dialog>
     );

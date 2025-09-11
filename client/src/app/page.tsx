@@ -13,10 +13,13 @@ import { Pricing } from "@/components/sections/landingpage/pricing";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
 import { DeliveryReceiptConverter } from "@/components/delivery-receipt-converter";
 import Footer from "@/components/sections/landingpage/footer";
+import { TenantHeader } from "@/components/tenant/tenant-header";
+import { useTenantOptional } from "@/context/tenant-context";
+import { LoginForm } from "@/components/auth/login-form";
 
 // Helper function to get section from URL hash
 const getSectionFromHash = (): SidebarActiveSection => {
-    if (typeof window === "undefined") return SIDE_BAR_SECTIONS.DASHBOARD;
+    if (typeof window === "undefined") return SIDE_BAR_SECTIONS.PDF_TO_CSV;
 
     const hash = window.location.hash;
     switch (hash) {
@@ -27,15 +30,27 @@ const getSectionFromHash = (): SidebarActiveSection => {
         case "#delivery-receipt-converter":
             return SIDE_BAR_SECTIONS.DELIVERY_RECEIPT;
         default:
-            return SIDE_BAR_SECTIONS.DASHBOARD;
+            return SIDE_BAR_SECTIONS.PDF_TO_CSV;
     }
 };
 
 export default function Home() {
     const { user, loading } = useAuth();
+    const tenantContext = useTenantOptional();
+    const tenant = tenantContext?.tenant;
+
+    // Debug logging
+    console.log(
+        "Home component - user:",
+        user,
+        "tenantContext:",
+        tenantContext,
+        "tenant:",
+        tenant
+    );
 
     const [activeSection, setActiveSection] = useState<SidebarActiveSection>(
-        SIDE_BAR_SECTIONS.DASHBOARD
+        SIDE_BAR_SECTIONS.PDF_TO_CSV
     );
 
     // Handle hash changes and initial load
@@ -44,10 +59,6 @@ export default function Home() {
             const newSection = getSectionFromHash();
             setActiveSection(newSection);
         };
-
-        if (!window.location.hash) {
-            window.history.replaceState(null, "", "#bankstatement-converter");
-        }
         handleHashChange();
 
         // Listen for hash changes
@@ -56,7 +67,15 @@ export default function Home() {
         return () => {
             window.removeEventListener("hashchange", handleHashChange);
         };
-    }, []);
+    }, [user, tenantContext]);
+
+    // Set default hash when user logs in
+    useEffect(() => {
+        if (user && !loading && !window.location.hash) {
+            window.history.replaceState(null, "", "#bankstatement-converter");
+            setActiveSection(SIDE_BAR_SECTIONS.PDF_TO_CSV);
+        }
+    }, [user, loading]);
 
     // Handle section change and update URL hash
     const handleSectionChange = (section: SidebarActiveSection) => {
@@ -86,6 +105,18 @@ export default function Home() {
         );
     }
 
+    // If we are under a tenant provider (subdomain) and user is not logged in,
+    // show a focused login page instead of marketing home
+    if (!user && tenantContext) {
+        return (
+            <div className="min-h-screen flex items-center justify-center p-6">
+                <div className="w-full max-w-md">
+                    <LoginForm />
+                </div>
+            </div>
+        );
+    }
+
     if (user) {
         return (
             <SidebarProvider
@@ -103,6 +134,7 @@ export default function Home() {
                 />
                 <SidebarInset>
                     <SiteHeader activeSection={activeSection} />
+                    {tenant && <TenantHeader />}
                     <div className="flex flex-1 flex-col bg-background">
                         <div className="@container/main flex flex-1 flex-col gap-2">
                             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

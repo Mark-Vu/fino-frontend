@@ -5,7 +5,6 @@ import { FileCog, Receipt } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
-import { ModeToggle } from "@/components/ui/mode-toggle";
 import {
     Sidebar,
     SidebarContent,
@@ -97,12 +96,7 @@ export function AppSidebar({
                     activeSection={activeSection}
                 />
             </SidebarContent>
-            <SidebarFooter>
-                <div className="flex items-center justify-between p-2">
-                    <ModeToggle />
-                    {user && <NavUser user={user} />}
-                </div>
-            </SidebarFooter>
+            <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
         </Sidebar>
     );
 }

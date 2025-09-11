@@ -1,6 +1,5 @@
 "use client";
 
-import { User } from "@supabase/supabase-js";
 import React, {
     createContext,
     useContext,
@@ -10,10 +9,23 @@ import React, {
 } from "react";
 import { getCurrentUser } from "@/app/actions/user.action";
 
+// AuthUser interface matching the backend response
+export interface AuthUser {
+    id: string;
+    name: string;
+    email: string;
+    globalRole: string;
+    tenantId?: string;
+    tenantRole?: string;
+    tenantApprovalStatus?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 interface AuthContextType {
-    user: User | null;
+    user: AuthUser | null;
     loading: boolean;
-    setUser: (user: User | null) => void;
+    setUser: (user: AuthUser | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,9 +43,9 @@ const Providers = ({
     authUser,
 }: {
     children: ReactNode;
-    authUser: User | null;
+    authUser: AuthUser | null;
 }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Initial load - fetch user data using server action
