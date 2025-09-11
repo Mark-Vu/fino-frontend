@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { FileText, AlertCircle, Loader2, Download } from "lucide-react";
+import { FileText, AlertCircle, Loader2, Download, Eye, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,14 +30,56 @@ interface UploadState {
     jobStatus?: JobStatus;
     isPolling?: boolean;
     fileId?: string; // Store the fileId for download
+    isProcessing?: boolean; // Add isProcessing flag like multiple converter
 }
+
+// Demo files - stored in S3 public-access folder
+const DEMO_FILES = [
+    {
+        id: "demo-pdf-1",
+        name: "sample_bank_statement.pdf",
+        type: "application/pdf",
+        icon: FileText,
+        description: "Sample Bank Statement 1",
+        size: "259.0 KB",
+        url: "https://fino-bucket-production.s3.amazonaws.com/public-access/sample_bank_statement.pdf",
+    },
+    {
+        id: "demo-pdf-2",
+        name: "sample_bank_statement_2.pdf",
+        type: "application/pdf",
+        icon: FileText,
+        description: "Sample Bank Statement 2",
+        size: "250.8 KB",
+        url: "https://fino-bucket-production.s3.amazonaws.com/public-access/sample_bank_statement_2.pdf",
+    },
+];
 
 export function PublicBankStatementConverter() {
     const [uploadState, setUploadState] = useState<UploadState>({
         file: null,
         status: UPLOAD_STATUS.IDLE,
         progress: 0,
+        isProcessing: false,
     });
+    const [previewFile, setPreviewFile] = useState<string | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    // Handle PDF preview
+    const handlePreviewClick = (
+        e: React.MouseEvent,
+        demoFile: (typeof DEMO_FILES)[0]
+    ) => {
+        e.stopPropagation(); // Prevent triggering the upload
+        setPreviewFile(demoFile.url);
+        setIsPreviewOpen(true);
+    };
+
+    const closePreview = () => {
+        setIsPreviewOpen(false);
+        setPreviewFile(null);
+    };
+
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length === 0) return;
 
@@ -64,6 +106,24 @@ export function PublicBankStatementConverter() {
         });
     }, []);
 
+    const handleDemoFileClick = async (demoFile: (typeof DEMO_FILES)[0]) => {
+        try {
+            // Fetch the demo file
+            const response = await fetch(demoFile.url);
+            const blob = await response.blob();
+
+            const file = new File([blob], demoFile.name, {
+                type: demoFile.type,
+            });
+            onDrop([file]);
+
+            // Simulate dropping the file
+            onDrop([file]);
+        } catch (error) {
+            console.error("Failed to load demo file:", error);
+        }
+    };
+
     const handleConvert = async () => {
         if (!uploadState.file) return;
 
@@ -72,6 +132,7 @@ export function PublicBankStatementConverter() {
             status: UPLOAD_STATUS.UPLOADING,
             progress: 0,
             error: undefined,
+            isProcessing: true,
         }));
 
         try {
@@ -97,6 +158,7 @@ export function PublicBankStatementConverter() {
                 jobId: confirmResult.job.id,
                 isPolling: true,
                 jobStatus: JobStatus.Pending,
+                isProcessing: true,
             }));
         } catch (error) {
             setUploadState({
@@ -104,6 +166,7 @@ export function PublicBankStatementConverter() {
                 status: UPLOAD_STATUS.ERROR,
                 progress: 0,
                 error: error instanceof Error ? error.message : "Upload failed",
+                isProcessing: false,
             });
         }
     };
@@ -146,6 +209,10 @@ export function PublicBankStatementConverter() {
                     job.status === JobStatus.Failed
                 ) {
                     clearInterval(pollInterval);
+                    setUploadState((prev) => ({
+                        ...prev,
+                        isProcessing: false,
+                    }));
                 }
             } catch (error) {
                 console.error("Failed to poll job status:", error);
@@ -154,6 +221,7 @@ export function PublicBankStatementConverter() {
                 setUploadState((prev) => ({
                     ...prev,
                     isPolling: false,
+                    isProcessing: false,
                     error: "Failed to check job status",
                 }));
             }
@@ -189,10 +257,7 @@ export function PublicBankStatementConverter() {
             "application/pdf": [".pdf"],
         },
         maxFiles: 1,
-        disabled:
-            uploadState.status === UPLOAD_STATUS.UPLOADING ||
-            uploadState.jobStatus === JobStatus.Pending ||
-            uploadState.jobStatus === JobStatus.Processing,
+        disabled: uploadState.isProcessing,
     });
 
     const resetUpload = () => {
@@ -201,6 +266,12 @@ export function PublicBankStatementConverter() {
             status: UPLOAD_STATUS.IDLE,
             progress: 0,
             error: undefined,
+            uploadResult: undefined,
+            jobId: undefined,
+            jobStatus: undefined,
+            isPolling: false,
+            fileId: undefined,
+            isProcessing: false,
         });
     };
 
@@ -222,15 +293,89 @@ export function PublicBankStatementConverter() {
                             Upload Bank Statement
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-6">
+                        {/* Demo Section */}
+                        <div className="space-y-3">
+                            <div className="text-center">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                    Try with Sample Files
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    Click on a demo file below to see how it
+                                    works
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {DEMO_FILES.map((demoFile) => {
+                                    const IconComponent = demoFile.icon;
+                                    return (
+                                        <div
+                                            key={demoFile.id}
+                                            className="group relative p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200"
+                                        >
+                                            <button
+                                                onClick={() =>
+                                                    handleDemoFileClick(
+                                                        demoFile
+                                                    )
+                                                }
+                                                disabled={
+                                                    uploadState.isProcessing
+                                                }
+                                                className="w-full flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <div className="flex-shrink-0">
+                                                    <IconComponent className="w-8 h-8 text-primary group-hover:text-primary/80" />
+                                                </div>
+                                                <div className="flex-1 text-left">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary">
+                                                        {demoFile.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        {demoFile.description} •{" "}
+                                                        {demoFile.size}
+                                                    </p>
+                                                </div>
+                                            </button>
+
+                                            {/* Preview Button */}
+                                            <button
+                                                onClick={(e) =>
+                                                    handlePreviewClick(
+                                                        e,
+                                                        demoFile
+                                                    )
+                                                }
+                                                className="absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                                title="Preview PDF"
+                                            >
+                                                <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                            </button>
+
+                                            <div className="absolute inset-0 rounded-lg bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                                    Or upload your own file
+                                </span>
+                            </div>
+                        </div>
+
                         {/* File Upload Area */}
                         <div
                             {...getRootProps()}
                             className={`border-2 border-dashed rounded-lg p-8 text-center border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 ${
-                                uploadState.status ===
-                                    UPLOAD_STATUS.UPLOADING ||
-                                uploadState.jobStatus === JobStatus.Pending ||
-                                uploadState.jobStatus === JobStatus.Processing
+                                uploadState.isProcessing
                                     ? "cursor-not-allowed opacity-50"
                                     : "cursor-pointer"
                             }`}
@@ -370,6 +515,35 @@ export function PublicBankStatementConverter() {
                     />
                 </div>
             </div>
+
+            {/* PDF Preview Modal */}
+            {isPreviewOpen && previewFile && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="relative w-full max-w-4xl h-[90vh] bg-white dark:bg-gray-900 rounded-lg shadow-2xl">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                PDF Preview
+                            </h3>
+                            <button
+                                onClick={closePreview}
+                                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                            </button>
+                        </div>
+
+                        {/* PDF Viewer */}
+                        <div className="h-[calc(100%-4rem)]">
+                            <iframe
+                                src={`${previewFile}#toolbar=1&navpanes=1&scrollbar=1`}
+                                className="w-full h-full border-0 rounded-b-lg"
+                                title="PDF Preview"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

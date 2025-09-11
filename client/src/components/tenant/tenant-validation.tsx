@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Building2, AlertCircle, CheckCircle } from "lucide-react";
-import { redirectToMainDomain } from "@/utils/tenant";
-import { useState } from "react";
+import { redirectToMainDomain, redirectToTenant } from "@/utils/tenant";
+import { useState, useEffect } from "react";
 import { TenantApprovalStatus } from "@/services/users.service";
 
 interface TenantValidationProps {
@@ -31,6 +31,20 @@ export function TenantValidation({ children }: TenantValidationProps) {
         requestAccess,
     } = useTenant();
     const [isRequesting, setIsRequesting] = useState(false);
+
+    // Check if user is accessing the wrong tenant and redirect them
+    useEffect(() => {
+        if (user && tenant && !loading && !error) {
+            // If user has a tenantId but it doesn't match the current tenant
+            if (user.tenantId && user.tenantId !== tenant.id) {
+                console.log(
+                    `User belongs to tenant ${user.tenantId} but accessing ${tenant.id}, redirecting...`
+                );
+                redirectToTenant(user.tenantId);
+                return;
+            }
+        }
+    }, [user, tenant, loading, error]);
 
     // Show loading state
     if (loading) {
