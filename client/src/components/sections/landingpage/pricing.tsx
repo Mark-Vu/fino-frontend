@@ -221,7 +221,7 @@ function PricingContent() {
 
 export function Pricing() {
     return (
-        <section className="relative isolate bg-background px-6 py-24 sm:py-32 lg:px-8">
+        <section className="relative isolate bg-background px-6 lg:px-8">
             {/* Background gradient */}
             <div
                 aria-hidden="true"
