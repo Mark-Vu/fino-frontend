@@ -1,13 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-    User,
-    Tenant,
-    getUserById,
-    requestTenantAccess,
-} from "@/services/users.service";
+import { User, Tenant, getUserById } from "@/services/users.service";
+import { requestTenantAccess } from "@/services/tenant.service";
 import { useAuth } from "@/context/auth-context";
+import { SITE_URL } from "@/lib/constants";
 
 interface TenantContextType {
     user: User | null;
@@ -40,13 +37,15 @@ export function TenantProvider({ children, subdomain }: TenantProviderProps) {
         if (!tenant || !authUser) return;
 
         try {
-            await requestTenantAccess(tenant.id);
+            const response = await requestTenantAccess(subdomain);
             // Refresh user data after request
             const updatedUser = await getUserById(authUser.id);
             setUser(updatedUser);
-        } catch (err) {
+            console.log("Access request successful:", response.message);
+        } catch (err: unknown) {
             console.error("Failed to request access:", err);
-            setError("Failed to request access. Please try again.");
+            // Redirect to base URL on failure
+            window.location.href = SITE_URL;
         }
     };
 

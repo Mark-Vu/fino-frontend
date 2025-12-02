@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import LoginModal from "../../auth/login-modal";
-import { ArrowRight } from "lucide-react";
+import { TryOurServices } from "./try-our-services";
 
 export function Hero() {
     return (
@@ -18,8 +16,8 @@ export function Hero() {
             {/* End Gradients */}
 
             <div className="relative z-10">
-                <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
-                    <div className="max-w-2xl text-center mx-auto">
+                <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+                    <div className="max-w-screen-2xl text-center mx-auto">
                         <p className="inline-block text-sm font-medium bg-clip-text bg-gradient-to-l from-blue-600 to-violet-500 text-transparent">
                             Fino: Financial Data, Simplified
                         </p>
@@ -27,7 +25,7 @@ export function Hero() {
                         {/* Title */}
                         <div className="mt-5 max-w-2xl mx-auto">
                             <h1 className="block font-semibold text-foreground text-4xl md:text-5xl lg:text-6xl">
-                                Convert Bank Statements to CSV — Fast and Secure
+                                Convert Bank Statements to CSV - Fast and Secure
                             </h1>
                         </div>
                         {/* End Title */}
@@ -37,24 +35,12 @@ export function Hero() {
                                 Fino helps you turn messy bank statements (PDF,
                                 PNG, JPEG, TIFF) into clean, structured CSVs
                                 ready for analysis. Use it free without an
-                                account, or sign in for saved history and faster
-                                workflows.
+                                account
                             </p>
                         </div>
 
-                        <div className="mt-8 gap-3 flex justify-center flex-col sm:flex-row">
-                            <Button variant="default" asChild>
-                                <a href="#try-services">Try it free</a>
-                            </Button>
-                            <LoginModal
-                                trigger={
-                                    <Button variant="outline">
-                                        10 free trials with most advanced model
-                                        <ArrowRight className="w-4 h-4" />
-                                    </Button>
-                                }
-                                hidden={false}
-                            />
+                        <div className="mt-8 gap-3 flex justify-center flex-col sm:flex-row max-w-screen-lg mx-auto w-full">
+                            <TryOurServices />
                         </div>
                     </div>
                 </div>

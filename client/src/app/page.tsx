@@ -8,8 +8,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
 import { SIDE_BAR_SECTIONS, type SidebarActiveSection } from "@/lib/constants";
 import { Hero } from "@/components/sections/landingpage/hero";
-import { TryOurServices } from "@/components/sections/landingpage/try-our-services";
-import { Pricing } from "@/components/sections/landingpage/pricing";
 import { MultipleBankStatementConverter } from "@/components/multiple-bank-statement-converter";
 import { DeliveryReceiptConverter } from "@/components/delivery-receipt-converter";
 import Footer from "@/components/sections/landingpage/footer";
@@ -238,8 +236,6 @@ export default function Home() {
     return (
         <div className="flex flex-col gap-16">
             <Hero />
-            <TryOurServices />
-            <Pricing />
             <Footer />
         </div>
     );

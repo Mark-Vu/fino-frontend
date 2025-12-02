@@ -86,17 +86,3 @@ export async function getUserById(userId: string): Promise<User> {
         throw new Error("Failed to get user information");
     }
 }
-
-/**
- * Request access to a tenant
- * @param tenantId - The tenant ID to request access to
- * @returns Promise indicating success
- */
-export async function requestTenantAccess(tenantId: string): Promise<void> {
-    try {
-        await api.post(`/tenants/${tenantId}/request-access`);
-    } catch (error) {
-        console.error("Failed to request tenant access:", error);
-        throw new Error("Failed to request access");
-    }
-}

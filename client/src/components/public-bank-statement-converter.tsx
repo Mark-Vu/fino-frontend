@@ -13,7 +13,6 @@ import {
     UPLOAD_STATUS,
     type UploadStatus,
 } from "@/lib/constants";
-import LoginModal from "./auth/login-modal";
 import { getJobStatusBadgeClasses } from "@/lib/constants";
 
 interface UploadState {
@@ -284,9 +283,9 @@ export function PublicBankStatementConverter() {
         uploadState.jobStatus === JobStatus.Failed;
 
     return (
-        <div className="px-4 lg:px-6 max-w-screen-2xl mx-auto">
+        <div className="px-4 lg:px-6 max-w-screen-2xl mx-auto w-full ">
             <div className="flex flex-col gap-6">
-                <Card className="max-w-2xl mx-auto w-full">
+                <Card className="mx-auto w-full">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5" />
@@ -503,17 +502,6 @@ export function PublicBankStatementConverter() {
                         </div>
                     </CardContent>
                 </Card>
-                <div className="mt-2">
-                    <LoginModal
-                        trigger={
-                            <span className="block text-right text-primary underline text-sm cursor-pointer hover:text-primary/80">
-                                Try our most accurate converter — get 10 free
-                                uses here
-                            </span>
-                        }
-                        hidden={false}
-                    />
-                </div>
             </div>
 
             {/* PDF Preview Modal */}
