@@ -10,31 +10,11 @@ export enum GlobalRole {
     SuperAdmin = "super_admin",
 }
 
-export enum TenantRole {
-    Admin = "admin",
-    Member = "member",
-}
-
-export enum TenantApprovalStatus {
-    Pending = "pending",
-    Approved = "approved",
-    Rejected = "rejected",
-}
-
 export interface User {
     id: string;
     name: string;
     email: string;
     globalRole: GlobalRole;
-    tenantId?: string;
-    tenantRole?: TenantRole;
-    tenantApprovalStatus?: TenantApprovalStatus;
-}
-
-export interface Tenant {
-    id: string;
-    companyName: string;
-    subdomain: string;
 }
 
 /**
@@ -63,11 +43,6 @@ export async function logOut(): Promise<void> {
     await supabase.auth.signOut();
 }
 
-/**
- * Get user by ID with tenant information
- * @param userId - The user ID to fetch
- * @returns Promise with user data including tenant information
- */
 export async function getUserById(userId: string): Promise<User> {
     try {
         const response = await api.get<{
@@ -75,9 +50,6 @@ export async function getUserById(userId: string): Promise<User> {
             name: string;
             email: string;
             globalRole: GlobalRole;
-            tenantId?: string;
-            tenantRole?: TenantRole;
-            tenantApprovalStatus?: TenantApprovalStatus;
         }>(`/users/${userId}`);
 
         return response.data;

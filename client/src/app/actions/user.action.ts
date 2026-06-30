@@ -9,9 +9,6 @@ interface AuthUser {
     name: string;
     email: string;
     globalRole: string;
-    tenantId?: string;
-    tenantRole?: string;
-    tenantApprovalStatus?: string;
     createdAt: string;
     updatedAt: string;
 }

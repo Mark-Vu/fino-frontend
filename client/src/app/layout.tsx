@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/sections/navbar/default";
-import { TenantLayout } from "@/components/tenant/tenant-layout";
 import { getCurrentUser } from "./actions/user.action";
 
 const geistSans = Geist({
@@ -44,13 +43,11 @@ export default async function RootLayout({
                     disableTransitionOnChange
                 >
                     <Providers authUser={user}>
-                        <TenantLayout>
-                            <div className="min-h-screen">
-                                {!user && <Navbar />}
+                        <div className="min-h-screen">
+                            {!user && <Navbar />}
 
-                                <main>{children}</main>
-                            </div>
-                        </TenantLayout>
+                            <main>{children}</main>
+                        </div>
                     </Providers>
                 </ThemeProvider>
                 <Toaster position="top-center" />

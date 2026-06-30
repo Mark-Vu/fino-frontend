@@ -407,8 +407,8 @@ export function DeliveryReceiptConverter() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <FileText className="w-5 h-5 text-gray-500" />
-                                                <div>
-                                                    <p className="font-medium">
+                                                <div className="min-w-0 text-left">
+                                                    <p className="truncate font-medium">
                                                         {fileState.file.name}
                                                     </p>
                                                     <p className="text-sm text-muted-foreground">

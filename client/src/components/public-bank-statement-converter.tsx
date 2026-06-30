@@ -310,7 +310,7 @@ export function PublicBankStatementConverter() {
                                     return (
                                         <div
                                             key={demoFile.id}
-                                            className="group relative p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200"
+                                            className="group relative cursor-pointer p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200"
                                         >
                                             <button
                                                 onClick={() =>
@@ -321,7 +321,7 @@ export function PublicBankStatementConverter() {
                                                 disabled={
                                                     uploadState.isProcessing
                                                 }
-                                                className="w-full flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full cursor-pointer flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <div className="flex-shrink-0">
                                                     <IconComponent className="w-8 h-8 text-primary group-hover:text-primary/80" />
@@ -398,8 +398,8 @@ export function PublicBankStatementConverter() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <FileText className="w-5 h-5 text-gray-500" />
-                                        <div>
-                                            <p className="font-medium">
+                                        <div className="min-w-0 text-left">
+                                            <p className="truncate font-medium">
                                                 {uploadState.file.name}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
