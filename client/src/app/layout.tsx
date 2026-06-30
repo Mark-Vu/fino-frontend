@@ -18,6 +18,8 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
     title: "Fino | Accounting Tools - Bank Statement, Delivery Receipt Converter",
     description:
